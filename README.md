@@ -3,4 +3,4 @@ This project was made to graduate from Ben Gurion University and actually works 
 You can check the assignment details [here](https://www.cs.bgu.ac.il/~spl211/Assignments/Assignment_3)  
 
 
-![alt text](https://media.giphy.com/media/3oKHW5ygEPHUNrb1SM/giphy.gif)
+![alt text](https://media.giphy.com/media/CTX0ivSQbI78A/giphy.gif)
