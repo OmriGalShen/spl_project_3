@@ -1,0 +1,1 @@
+mvn exec:java -Dexec.mainClass=”bgu.spl.net.impl.BGRSServer.TPCMain” -Dexec.args=”<port>”

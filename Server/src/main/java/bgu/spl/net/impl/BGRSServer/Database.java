@@ -1,4 +1,4 @@
-
+package bgu.spl.net.impl.BGRSServer;
 
 
 /**
@@ -11,6 +11,9 @@
  */
 public class Database {
 
+	private static class DatabaseHolder { // singleton pattern
+		private static Database instance = new Database();
+	}
 
 	//to prevent user from creating new Database
 	private Database() {
@@ -21,7 +24,7 @@ public class Database {
 	 * Retrieves the single instance of this class.
 	 */
 	public static Database getInstance() {
-		return singleton;
+		return DatabaseHolder.instance;
 	}
 	
 	/**
