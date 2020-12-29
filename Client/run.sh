@@ -1,2 +1,2 @@
 make
-./bin/BGRSclient localhost 777
+./bin/BGRSclient 127.0.0.1 7777
