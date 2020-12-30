@@ -22,7 +22,7 @@ void inputTask(ConnectionHandler& handler){
         }
 }
 
-void outputTask(ConnectionHandle& handler){
+void outputTask(ConnectionHandler& handler){
     while(1){
         // We can use one of three options to read data from the server:
         // 1. Read a fixed number of characters
@@ -31,10 +31,10 @@ void outputTask(ConnectionHandle& handler){
         std::string answer;
         // Get back an answer: by using the expected number of bytes (len bytes + newline delimiter)
         // We could also use: connectionHandler.getline(answer) and then get the answer without the newline char at the end
-        if (!handler.getLine(answer)) {
-            std::cout << "Disconnected. Exiting...\n" << std::endl;
-            break;
-        }
+//        if (!handler.getLine(answer)) {
+//            std::cout << "Disconnected. Exiting...\n" << std::endl;
+//            break;
+//        }
 
 		int len=answer.length();
 		// A C string must end with a 0 char delimiter.  When we filled the answer buffer from the socket
@@ -132,8 +132,9 @@ int main (int argc, char *argv[]) {
 //    th1.join();
 //    th2.join();
 
-    boost::thread inputThread(&inputTask,&connectionHandler);
-    boost::thread outputThread(&outputTask,&connectionHandler);
+
+    boost::thread inputThread(&inputTask,boost::ref(connectionHandler));
+    boost::thread outputThread(&outputTask,boost::ref(connectionHandler));
     inputThread.join();
     outputThread.join();
     return 0;
