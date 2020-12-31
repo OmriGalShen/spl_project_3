@@ -66,7 +66,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<RGRSMess
             ArrayList<String> stringOperations = new ArrayList<>();
             // start from index 2 because the first 2 bytes are opCodes
             for (int i = 2, stringStart = 2; i < len; i++) {
-                if (bytes[i] == 0xa) { // end of string operation
+                if (bytes[i] == '\0') { // end of string operation
                     stringOperations.add(new String(bytes, stringStart, i, StandardCharsets.UTF_8));
                     stringStart = i + 1;
                 }
@@ -78,7 +78,6 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<RGRSMess
         }
         len=0; //reset position on bytes array
         return message;
-
     }
 
     @Override
