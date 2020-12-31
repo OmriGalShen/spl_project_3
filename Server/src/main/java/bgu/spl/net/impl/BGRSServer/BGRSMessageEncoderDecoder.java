@@ -1,16 +1,11 @@
 package bgu.spl.net.impl.BGRSServer;
 
-import bgu.spl.net.api.Message;
 import bgu.spl.net.api.MessageEncoderDecoder;
-import bgu.spl.net.impl.BGRSServer.Messages.ACKMessage;
-import bgu.spl.net.impl.BGRSServer.Messages.ErrorMessage;
-import bgu.spl.net.impl.BGRSServer.Messages.RGRSMessage;
-import bgu.spl.net.impl.BGRSServer.Messages.RequestMessage;
+import bgu.spl.net.impl.BGRSServer.Messages.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 
 public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<RGRSMessage> {
     private byte[] bytes = new byte[1 << 10]; //start with 1k
@@ -62,21 +57,25 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<RGRSMess
     }
 
     private RGRSMessage popMessage() {
-        RequestMessage message = new RequestMessage();
+        RGRSMessage message = new RequestMessage();
         if(this.len<2) // invalid message
-            return message;
+            return null;
         short opCode = bytesToShort(new byte[]{bytes[0], bytes[1]});
-        // --    get operations --    //
-        ArrayList<String> stringOperations = new ArrayList<>();
-        // start from index 2 because the first 2 bytes are opCodes
-        for (int i = 2,stringStart=2; i < len; i++) {
-            if(bytes[i]==0xa){ // end of string operation
-                stringOperations.add(new String(bytes, stringStart, i, StandardCharsets.UTF_8));
-                stringStart=i+1;
+        if(opCode==1||opCode==2||opCode==3||opCode==8||opCode==4||opCode==11) { // request message
+            // --    get operations --    //
+            ArrayList<String> stringOperations = new ArrayList<>();
+            // start from index 2 because the first 2 bytes are opCodes
+            for (int i = 2, stringStart = 2; i < len; i++) {
+                if (bytes[i] == 0xa) { // end of string operation
+                    stringOperations.add(new String(bytes, stringStart, i, StandardCharsets.UTF_8));
+                    stringStart = i + 1;
+                }
             }
+            message = new RequestMessage(opCode,stringOperations);
+        }else if(opCode==5||opCode==6||opCode==7||opCode==9||opCode==10) {// messages with course number
+            short courseNum = Short.parseShort(new String(bytes, 2,bytes.length, StandardCharsets.UTF_8));
+            message = new CourseInfoMessage(opCode,courseNum);
         }
-        message.setOpCode(opCode);
-        message.setOperations(stringOperations);
         len=0; //reset position on bytes array
         return message;
 
