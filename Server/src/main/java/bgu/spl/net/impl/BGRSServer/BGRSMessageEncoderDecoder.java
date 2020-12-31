@@ -94,18 +94,20 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<RGRSMess
             byte[] messageOpCode = shortToBytes(ackMessage.getMessageOpCode()); //length 2
 
 
-            int messageLen = opCode.length+ackMessageBytes.length+messageOpCode.length+1;
+            int messageLen = opCode.length+ackMessageBytes.length+messageOpCode.length+2;
             result = new byte[messageLen];
             System.arraycopy(opCode,0,result,0,2);
             System.arraycopy(ackMessageBytes,0,result,2,ackMessageBytes.length);
             System.arraycopy(messageOpCode,0,result,ackMessageBytes.length+2,2);
-            result[result.length-1]=0; // end of message
+            result[result.length-2]=0; // end of message
+            result[result.length-1]='\n'; // end of message
         }
         else if(message instanceof ErrorMessage){
             byte[] messageOpCode = shortToBytes( ((ErrorMessage) message).getMessageOpCode());
-            result = new byte[4];
+            result = new byte[5];
             System.arraycopy(opCode,0,result,0,2);
             System.arraycopy(messageOpCode,0,result,2,2);
+            result[result.length-1]='\n'; // end of message
         }
         return result;
     }
