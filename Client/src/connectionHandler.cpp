@@ -68,6 +68,23 @@ bool ConnectionHandler::getLine(std::string& line) {
 }
 
 bool ConnectionHandler::sendLine(std::string& line) {
+    std::string delim = " ";
+
+    vector<string> strVec;
+
+    auto start = 0U;
+    auto end = line.find(delim);
+    while (end != std::string::npos)
+    {
+        strVec.push_back(line.substr(start, end - start));
+        start = end + delim.length();
+        end = line.find(delim, start);
+    }
+    strVec.push_back(line.substr(start, end));
+
+
+    short opCode = stringToOpCode(strVec[0]);
+    std::cerr << "opcode: " << opCode << std::endl;
     return sendFrameAscii(line, '\n');
 }
  
@@ -107,3 +124,34 @@ void ConnectionHandler::close() {
         std::cout << "closing failed: connection already closed" << std::endl;
     }
 }
+
+short ConnectionHandler::stringToOpCode(const std::string& opCode) {
+    if(opCode=="ADMINREG") return 1;
+    if(opCode=="STUDENTREG") return 2;
+    if(opCode=="LOGIN") return 3;
+    if(opCode=="LOGOUT") return 4;
+    if(opCode=="COURSEREG") return 5;
+    if(opCode=="KDAMCHECK") return 6;
+    if(opCode=="COURSESTAT") return 7;
+    if(opCode=="STUDENTSTAT") return 8;
+    if(opCode=="ISREGISTERED") return 9;
+    if(opCode=="UNREGISTER") return 10;
+    if(opCode=="MYCOURSES") return 11;
+    return 0;
+}
+
+short ConnectionHandler::bytesToShort(const char* bytesArr)
+{
+    short result = (short)((bytesArr[0] & 0xff) << 8);
+    result += (short)(bytesArr[1] & 0xff);
+    return result;
+}
+
+void ConnectionHandler::shortToBytes(short num, char* bytesArr)
+{
+    bytesArr[0] = ((num >> 8) & 0xFF);
+    bytesArr[1] = (num & 0xFF);
+}
+
+
+

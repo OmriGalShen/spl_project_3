@@ -6,6 +6,7 @@
 #include <boost/asio.hpp>
 
 using boost::asio::ip::tcp;
+using namespace std;
 
 class ConnectionHandler {
 private:
@@ -47,7 +48,13 @@ public:
 	
     // Close down the connection properly.
     void close();
- 
+
+    static short stringToOpCode(const std::string& opCode);
+
+    short bytesToShort(const char* bytesArr);
+
+    static void shortToBytes(short num, char* bytesArr);
+
 }; //class ConnectionHandler
  
 #endif
