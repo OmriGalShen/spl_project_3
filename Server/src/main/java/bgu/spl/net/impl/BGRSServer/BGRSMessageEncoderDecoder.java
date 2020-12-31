@@ -16,13 +16,23 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<RGRSMess
     private byte[] bytes = new byte[1 << 10]; //start with 1k
     private int len = 0;
 
-    public short bytesToShort(byte[] byteArr)
+    /**
+     * Simple helper function for conversion
+     * @param byteArr array of bytes of length 2
+     * @return short after conversion
+     */
+    public static short bytesToShort(byte[] byteArr)
     {
         short result = (short)((byteArr[0] & 0xff) << 8);
         result += (short)(byteArr[1] & 0xff);
         return result;
     }
 
+    /**
+     * Simple helper function for conversion
+     * @param num short to convert
+     * @return array of bytes of length 2
+     */
     public byte[] shortToBytes(short num)
     {
         byte[] bytesArr = new byte[2];
@@ -47,14 +57,14 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<RGRSMess
     public byte[] encode(RGRSMessage message) {
 
 //        return (message + "\n").getBytes(); //uses utf8 by default
-        byte[] result=null;
+        byte[] result=null; // the return message
 
-        byte[] opCode = shortToBytes(message.getOpCode());
+        byte[] opCode = shortToBytes(message.getOpCode()); // length 2
 
         if(message instanceof ACKMessage){
             ACKMessage ackMessage = (ACKMessage)message;
             byte[] ackMessageBytes=ackMessage.getAckMessage().getBytes();
-            byte[] messageOpCode = shortToBytes(ackMessage.getMessageOpCode());
+            byte[] messageOpCode = shortToBytes(ackMessage.getMessageOpCode()); //length 2
 
 
             int messageLen = opCode.length+ackMessageBytes.length+messageOpCode.length+1;
