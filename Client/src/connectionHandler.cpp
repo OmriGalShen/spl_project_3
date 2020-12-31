@@ -64,7 +64,42 @@ bool ConnectionHandler::sendBytes(const char bytes[], int bytesToWrite) {
 }
  
 bool ConnectionHandler::getLine(std::string& line) {
-    return getFrameAscii(line, '\n');
+//    return getFrameAscii(line, '\n');
+    char ch;
+    try {
+        if(!getBytes(&ch, 2)) //read op code bytes
+            return false;
+        short opCode = bytesToShort(&ch);
+
+        if(opCode==12) { // ACK message
+            if(!getBytes(&ch, 2)) // read message op code
+                return false;
+            char charToRead;
+            string message;
+            do{
+                if(!getBytes(&charToRead, 1))
+                {
+                    return false;
+                }
+                if(ch!='\0')
+                    message.append(1, ch);
+            }
+            while ('\n' != ch);
+            std::cerr << "ACK " << message << std::endl;
+        }
+        else if(opCode==13) { // Error message
+            char charToRead;
+            if(!getBytes(&charToRead, 2)) // read message op code
+                return false;
+            std::cerr << "ERROR " << charToRead << std::endl;
+        }
+        else return false; //invalid op code
+
+    } catch (std::exception& e) {
+        std::cerr << "recv failed2 (Error: " << e.what() << ')' << std::endl;
+        return false;
+    }
+    return true;
 }
 
 bool ConnectionHandler::sendLine(std::string& line) {
@@ -106,7 +141,6 @@ bool ConnectionHandler::sendLine(std::string& line) {
         if(!result) return false;
         std::cerr << "course number: " << courseNumber << std::endl;
     }
-
     // --   end message    -- //
     char endByte={'\n'};
     return sendBytes(&endByte,1);
@@ -141,7 +175,7 @@ bool ConnectionHandler::sendFrameAscii(const std::string& frame, char delimiter)
 	if(!result) return false;
 	return sendBytes(&delimiter,1);
 }
- 
+
 // Close down the connection properly.
 void ConnectionHandler::close() {
     try{
