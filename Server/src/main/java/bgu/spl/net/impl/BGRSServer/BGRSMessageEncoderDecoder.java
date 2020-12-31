@@ -53,6 +53,35 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<RGRSMess
         return null; //not a line yet
     }
 
+    private void pushByte(byte nextByte) {
+        if (len >= bytes.length) {
+            bytes = Arrays.copyOf(bytes, len * 2);
+        }
+
+        bytes[len++] = nextByte;
+    }
+
+    private RGRSMessage popMessage() {
+        RequestMessage message = new RequestMessage();
+        if(this.len<2) // invalid message
+            return message;
+        short opCode = bytesToShort(new byte[]{bytes[0], bytes[1]});
+        // --    get operations --    //
+        ArrayList<String> stringOperations = new ArrayList<>();
+        // start from index 2 because the first 2 bytes are opCodes
+        for (int i = 2,stringStart=2; i < len; i++) {
+            if(bytes[i]==0xa){ // end of string operation
+                stringOperations.add(new String(bytes, stringStart, i, StandardCharsets.UTF_8));
+                stringStart=i+1;
+            }
+        }
+        message.setOpCode(opCode);
+        message.setOperations(stringOperations);
+        len=0; //reset position on bytes array
+        return message;
+
+    }
+
     @Override
     public byte[] encode(RGRSMessage message) {
 
@@ -81,34 +110,5 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<RGRSMess
             System.arraycopy(messageOpCode,0,result,2,2);
         }
         return result;
-    }
-
-    private void pushByte(byte nextByte) {
-        if (len >= bytes.length) {
-            bytes = Arrays.copyOf(bytes, len * 2);
-        }
-
-        bytes[len++] = nextByte;
-    }
-
-    private RGRSMessage popMessage() {
-        RequestMessage message = new RequestMessage();
-        if(this.len<2) // invalid message
-            return message;
-        short opCode = bytesToShort(new byte[]{bytes[0], bytes[1]});
-        // --    get operations --    //
-        ArrayList<String> stringOperations = new ArrayList<>();
-        // start from index 2 because the first 2 bytes are opCodes
-        for (int i = 2,stringStart=2; i < len; i++) {
-            if(bytes[i]==0xa){ // end of string operation
-                stringOperations.add(new String(bytes, stringStart, i, StandardCharsets.UTF_8));
-                stringStart=i+1;
-            }
-        }
-        message.setOpCode(opCode);
-        message.setOperations(stringOperations);
-        len=0; //reset position on bytes array
-        return message;
-
     }
 }
