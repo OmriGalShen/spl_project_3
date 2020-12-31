@@ -4,8 +4,10 @@
 #include <string>
 #include <iostream>
 #include <boost/asio.hpp>
+#include <algorithm>
 
 using boost::asio::ip::tcp;
+using namespace std;
 
 class ConnectionHandler {
 private:
@@ -47,7 +49,15 @@ public:
 	
     // Close down the connection properly.
     void close();
- 
+
+    static short stringToOpCode(const std::string& opCode);
+
+    short bytesToShort(const char* bytesArr);
+
+    static void shortToBytes(short num, char* bytesArr);
+
+    string processInput(char* bytesArr);
+
 }; //class ConnectionHandler
  
 #endif
