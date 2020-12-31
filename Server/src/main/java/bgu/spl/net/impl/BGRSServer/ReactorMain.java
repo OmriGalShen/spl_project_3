@@ -1,22 +1,17 @@
 package bgu.spl.net.impl.BGRSServer;
+
 import bgu.spl.net.srv.Server;
 
 public class ReactorMain {
     public static void main(String[] args) {
-        System.out.println("In ReactorMain");
-//        System.out.println(args[0]);
-        // you can use any server...
-//        Server.threadPerClient(
-//                7777, //port
-//                () -> new RemoteCommandInvocationProtocol<>(feed), //protocol factory
-//                ObjectEncoderDecoder::new //message encoder decoder factory
-//        ).serve();
-
-//        Server.reactor(
-//                Runtime.getRuntime().availableProcessors(),
-//                7777, //port
-//                () ->  new RemoteCommandInvocationProtocol<>(), //protocol factory
-//                ObjectEncoderDecoder::new //message encoder decoder factory
-//        ).serve();
+        if (args.length < 2) {
+            System.out.println("You must supply port and number of threads");
+        }
+        Server.reactor(
+                Integer.parseInt(args[1]), // number of threads
+                Integer.parseInt(args[0]), // port
+                () -> new BGRSMessagingProtocol(),
+                () -> new BGRSMessageEncoderDecoder()
+        ).serve();
     }
 }
