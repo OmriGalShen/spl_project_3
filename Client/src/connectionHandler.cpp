@@ -82,8 +82,8 @@ bool ConnectionHandler::getLine(std::string& line) {
     }
     char opCodeBytes[] = {bytes[0],bytes[1]};
     short opCode = bytesToShort(opCodeBytes);
-    std::cerr << "opcode: " << opCode << std::endl;
     if(opCode==12) {// ACK message
+        line = "ACK ";
         for(unsigned i=4;i<bytes.size();i++)
             line.append(1,bytes[i]);
     }
@@ -122,7 +122,7 @@ bool ConnectionHandler::sendLine(std::string& line) {
     if(opCode==1||opCode==2||opCode==3||opCode==8) { // messages with strings
         std::replace(line.begin(), line.end(), ' ', '\0'); //Replace spaces with \0
         line += '\0'; // add ending character
-        std::cerr << "strings: " << line << std::endl;
+//        std::cerr << "strings: " << line << std::endl;
 
         result=sendBytes(line.c_str(),line.length()); // send strings
         if(!result) return false;
@@ -133,7 +133,7 @@ bool ConnectionHandler::sendLine(std::string& line) {
         shortToBytes(courseNumber,codeBytesArr);
         bool result=sendBytes(codeBytesArr,2);
         if(!result) return false;
-        std::cerr << "course number: " << courseNumber << std::endl;
+//        std::cerr << "course number: " << courseNumber << std::endl;
     }
     // --   end message    -- //
     char endByte={'\n'};
@@ -156,7 +156,6 @@ bool ConnectionHandler::getFrameAscii(std::string& frame, char delimiter) {
 		}
 		frame.append(1, ch);
         bytes.push_back(ch);
-        std::cout << "size:"<< bytes.size() << std::endl;
 	}while (delimiter != ch);
     } catch (std::exception& e) {
 	std::cerr << "recv failed2 (Error: " << e.what() << ')' << std::endl;
