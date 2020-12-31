@@ -68,24 +68,30 @@ bool ConnectionHandler::getLine(std::string& line) {
 }
 
 bool ConnectionHandler::sendLine(std::string& line) {
+
+    // --     get op code -- //
     std::string delim = " ";
-
-    vector<string> strVec;
-
-    auto start = 0U;
-    auto end = line.find(delim);
-    while (end != std::string::npos)
-    {
-        strVec.push_back(line.substr(start, end - start));
-        start = end + delim.length();
-        end = line.find(delim, start);
-    }
-    strVec.push_back(line.substr(start, end));
-
-
-    short opCode = stringToOpCode(strVec[0]);
+    int index =line.find(delim);
+    string strOpCode= line.substr(0,index);
+    short opCode = stringToOpCode(strOpCode);
     std::cerr << "opcode: " << opCode << std::endl;
-    return sendFrameAscii(line, '\n');
+    // -----------------------------//
+
+    // --     Replace spaces with \0 -- //
+    line = line.substr(index+1,line.length()-index)+'\0';
+    std::replace( line.begin(), line.end(), ' ', '\0');
+    std::cerr << "string len: " << line.length() << std::endl;
+    std::cerr << "strings: " << line << std::endl;
+    // -----------------------------------------------------//
+
+    char codeBytesArr[2];
+    const char *byteArr = line.c_str();
+    shortToBytes(opCode,codeBytesArr);
+
+    bool result=sendBytes(codeBytesArr,2);
+    if(!result) return false;
+    return sendBytes(&ending,1);
+//    return sendFrameAscii(line, '\n');
 }
  
 
