@@ -56,6 +56,8 @@ public:
 
     static void shortToBytes(short num, char* bytesArr);
 
+    string processInput(char* bytesArr);
+
 }; //class ConnectionHandler
  
 #endif
