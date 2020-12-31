@@ -70,28 +70,48 @@ bool ConnectionHandler::getLine(std::string& line) {
 bool ConnectionHandler::sendLine(std::string& line) {
 
     // --     get op code -- //
-    std::string delim = " ";
-    int index =line.find(delim);
-    string strOpCode= line.substr(0,index);
-    short opCode = stringToOpCode(strOpCode);
+    unsigned int index =line.find(" "); //find first space
+    string strOpCode=line; // string with op code
+
+    if(index != string::npos) {// a space was found
+        strOpCode = line.substr(0, line.find(" ")); // get substring with op code
+        line = line.substr(index + 1, line.length() - index); //remove op code from rest of the line
+    }
+    short opCode = stringToOpCode(strOpCode); // get op code
+    if(opCode==0) return false; // op code not valid
     std::cerr << "opcode: " << opCode << std::endl;
     // -----------------------------//
 
-    // --     Replace spaces with \0 -- //
-    line = line.substr(index+1,line.length()-index)+'\0';
-    std::replace( line.begin(), line.end(), ' ', '\0');
-    std::cerr << "string len: " << line.length() << std::endl;
-    std::cerr << "strings: " << line << std::endl;
-    // -----------------------------------------------------//
-
+    // --    send op code --  //
     char codeBytesArr[2];
-    const char *byteArr = line.c_str();
     shortToBytes(opCode,codeBytesArr);
-
     bool result=sendBytes(codeBytesArr,2);
     if(!result) return false;
-    return sendBytes(&ending,1);
-//    return sendFrameAscii(line, '\n');
+    // ----------------------------//
+
+
+    if(opCode==1||opCode==2||opCode==3||opCode==8) { // messages with strings
+        std::replace(line.begin(), line.end(), ' ', '\0'); //Replace spaces with \0
+        line += '\0'; // add ending character
+        std::cerr << "strings: " << line << std::endl;
+
+        result=sendBytes(line.c_str(),line.length()); // send strings
+        if(!result) return false;
+    }
+    else if(opCode==5||opCode==6||opCode==7||opCode==9||opCode==10){  // messages with course number
+        short courseNumber = short(atoi( line.c_str() )); // //get course number as short
+        char codeBytesArr[2];
+        shortToBytes(courseNumber,codeBytesArr);
+        bool result=sendBytes(codeBytesArr,2);
+        if(!result) return false;
+        std::cerr << "course number: " << courseNumber << std::endl;
+    }
+
+    // --   end message    -- //
+    char endByte={'\n'};
+    return sendBytes(&endByte,1);
+    // ----------------------------//
+
 }
  
 
