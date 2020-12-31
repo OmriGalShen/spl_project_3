@@ -97,8 +97,8 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<RGRSMess
             int messageLen = opCode.length+ackMessageBytes.length+messageOpCode.length+2;
             result = new byte[messageLen];
             System.arraycopy(opCode,0,result,0,2);
-            System.arraycopy(ackMessageBytes,0,result,2,ackMessageBytes.length);
-            System.arraycopy(messageOpCode,0,result,ackMessageBytes.length+2,2);
+            System.arraycopy(messageOpCode,0,result,2,2);
+            System.arraycopy(ackMessageBytes,0,result,4,ackMessageBytes.length);
             result[result.length-2]=0; // end of message
             result[result.length-1]='\n'; // end of message
         }
