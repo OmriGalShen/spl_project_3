@@ -83,9 +83,15 @@ bool ConnectionHandler::getLine(std::string& line) {
     char opCodeBytes[] = {bytes[0],bytes[1]};
     short opCode = bytesToShort(opCodeBytes);
     if(opCode==12) {// ACK message
+        char messageCodeBytes[] = {bytes[2],bytes[3]};
+        short messageCode = bytesToShort(messageCodeBytes);
+        if(messageCode==4)
+            line = "TERMINATE";
+        else{
         line = "ACK ";
         for(unsigned i=4;i<bytes.size();i++)
             line.append(1,bytes[i]);
+        }
     }
     else if(opCode==13){// Error message
         char messageCodeBytes[] = {bytes[2],bytes[3]};
