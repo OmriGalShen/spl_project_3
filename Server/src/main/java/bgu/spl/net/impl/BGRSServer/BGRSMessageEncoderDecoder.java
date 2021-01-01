@@ -46,7 +46,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<RGRSMess
                 case 2: //STUDENTREG
                 case 3: //LOGIN
                     int zeroByteCounter=0;
-                    for(int i=0;i<len&&zeroByteCounter<2;i++)
+                    for(int i=2;i<len&&zeroByteCounter<2;i++) //op code bytes may contain zero byte
                         if(bytes[i]=='\0')
                             zeroByteCounter++;
                     if(zeroByteCounter==2) // termination condition
@@ -64,7 +64,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<RGRSMess
                         return popMessage();
                     break;
                 case 8: //STUDENTSTAT
-                    for(int i=0;i<len;i++) {
+                    for(int i=2;i<len;i++) { //op code bytes may contain zero byte
                         if (bytes[i] == '\0') // termination condition
                             return popMessage();
                     }
