@@ -82,7 +82,9 @@ bool ConnectionHandler::getLine(std::string& line) {
                 opCodeBytes[1] = bytes[1];
                 opCode = bytesToShort(opCodeBytes);
             }
-        }while ('\0' != ch&&!(opCode==13&&bytes.size()==4));
+            if(opCode==13&&bytes.size()==4) //error message
+                break;
+        }while (bytes.size()<=4||'\0' != ch);
     } catch (std::exception& e) {
         std::cerr << "recv failed2 (Error: " << e.what() << ')' << std::endl;
         return false;
