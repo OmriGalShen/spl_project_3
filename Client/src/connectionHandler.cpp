@@ -114,7 +114,7 @@ bool ConnectionHandler::sendLine(std::string& line) {
     }
     short opCode = stringToOpCode(strOpCode); // get op code
     if(opCode==0) return false; // op code not valid
-    std::cerr << "opcode: " << opCode << std::endl;
+//    std::cerr << "opcode: " << opCode << std::endl;
     // -----------------------------//
 
     // --    send op code --  //

@@ -12,14 +12,14 @@ void inputTask(ConnectionHandler& handler){
                 std::cin.getline(buf, bufsize);
                 std::string line(buf);
 
-                int len = line.length();
+//                int len = line.length();
                 if (!handler.sendLine(line)) {
 //                    std::cout << "Disconnected. Exiting...\n" << std::endl;
                     break;
                 }
 
                 // connectionHandler.sendLine(line) appends '\n' to the message. Therefor we send len+1 bytes.
-                std::cout << "Sent " << len + 1 << " bytes to server" << std::endl;
+//                std::cout << "Sent " << len + 1 << " bytes to server" << std::endl;
             }
             catch (boost::thread_interrupted&) {
                 break;
@@ -70,7 +70,7 @@ int main (int argc, char *argv[]) {
             std::cout << "Exiting... press enter to exit\n" << std::endl;
             break;
         }
-        std::cout << "Reply: " << answer  << std::endl;
+        std::cout << answer  << std::endl;
     }
 
     inputThread.join();
