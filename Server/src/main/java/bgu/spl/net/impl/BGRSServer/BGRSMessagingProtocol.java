@@ -13,6 +13,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
     @Override
     public RGRSMessage process(RGRSMessage msg) {
         short opCode = msg.getOpCode();
+        System.out.println("In protocol, received opcode: "+opCode);
         RGRSMessage response = new ACKMessage((short) 12,msg.getOpCode(),"a");;
         //        RGRSMessage response = new ErrorMessage((short) 13,(short) 5);
         switch (opCode){

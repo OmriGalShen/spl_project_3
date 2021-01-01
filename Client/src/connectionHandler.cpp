@@ -88,6 +88,7 @@ bool ConnectionHandler::getLine(std::string& line) {
         return false;
     }
     if(opCode==12) {// ACK message
+        std::cout << "Received ACK message" << std::endl;
         char messageCodeBytes[] = {bytes[2],bytes[3]};
         short messageCode = bytesToShort(messageCodeBytes);
         if(messageCode==4) // ACK message from logout -> termination condition
@@ -99,6 +100,7 @@ bool ConnectionHandler::getLine(std::string& line) {
         }
     }
     else if(opCode==13){// Error message
+        std::cout << "Received Error message" << std::endl;
         char messageCodeBytes[] = {bytes[2],bytes[3]};
         short messageCode = bytesToShort(messageCodeBytes);
         line = "ERROR "+std::to_string(messageCode);
@@ -147,6 +149,7 @@ bool ConnectionHandler::sendLine(std::string& line) {
 //        std::cerr << "course number: " << courseNumber << std::endl;
     }
     // if opCode==11 then only opcode bytes needed to be send
+    return true;
 }
  
 
