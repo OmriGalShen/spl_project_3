@@ -38,6 +38,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<RGRSMess
 
     @Override
     public RGRSMessage decodeNextByte(byte nextByte) {
+        pushByte(nextByte);
         if(len>=2){ //check op code to determine pop condition
             short opCode = bytesToShort(new byte[]{bytes[0], bytes[1]}); //get op code
             switch (opCode){
@@ -70,7 +71,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<RGRSMess
                     break;
             }
         }
-        pushByte(nextByte);
+
         return null; //not a line yet
     }
 
