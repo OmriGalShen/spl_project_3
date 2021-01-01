@@ -60,7 +60,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<RGRSMess
                 case 7: //COURSESTAT
                 case 9: //ISREGISTERED
                 case 10: //UNREGISTER
-                    if(len==5) // termination condition
+                    if(len==4) // termination condition
                         return popMessage();
                     break;
                 case 8: //STUDENTSTAT
@@ -100,7 +100,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<RGRSMess
             }
             message = new RequestMessage(opCode,stringOperations);
         }else if(opCode==5||opCode==6||opCode==7||opCode==9||opCode==10) {// messages with course number
-            short courseNum = Short.parseShort(new String(bytes, 2,bytes.length, StandardCharsets.UTF_8));
+            short courseNum = bytesToShort(new byte[]{bytes[2],bytes[3]});
             message = new CourseInfoMessage(opCode,courseNum);
         }
         len=0; //reset position on bytes array
