@@ -1,2 +1,1 @@
-mvn compile
-mvn exec:java -Dexec.mainClass="bgu.spl.net.impl.BGRSServer.TPCMain" -Dexec.args="7777"
+mvn exec:java -Dexec.mainClass="bgu.spl.net.impl.BGRSServer.TPCMain" -Dexec.args="7777";
