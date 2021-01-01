@@ -38,13 +38,40 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<RGRSMess
 
     @Override
     public RGRSMessage decodeNextByte(byte nextByte) {
-        //notice that the top 128 ascii characters have the same representation as their utf-8 counterparts
-        //this allow us to do the following comparison
-        if (nextByte == '\n') {
-            return popMessage();
+        pushByte(nextByte);
+        if(len>=2){ //check op code to determine pop condition
+            short opCode = bytesToShort(new byte[]{bytes[0], bytes[1]}); //get op code
+            switch (opCode){
+                case 1: //ADMINREG
+                case 2: //STUDENTREG
+                case 3: //LOGIN
+                    int zeroByteCounter=0;
+                    for(int i=0;i<len&&zeroByteCounter<2;i++)
+                        if(bytes[i]=='\0')
+                            zeroByteCounter++;
+                    if(zeroByteCounter==2) // termination condition
+                        return popMessage();
+                    break;
+                case 4: //LOGOUT
+                case 11: //MYCOURSES
+                    return popMessage();
+                case 5: //COURSEREG
+                case 6: // KDAMCHECK
+                case 7: //COURSESTAT
+                case 9: //ISREGISTERED
+                case 10: //UNREGISTER
+                    if(len==5) // termination condition
+                        return popMessage();
+                    break;
+                case 8: //STUDENTSTAT
+                    for(int i=0;i<len;i++) {
+                        if (bytes[i] == '\0') // termination condition
+                            return popMessage();
+                    }
+                    break;
+            }
         }
 
-        pushByte(nextByte);
         return null; //not a line yet
     }
 
@@ -94,20 +121,18 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<RGRSMess
             byte[] messageOpCode = shortToBytes(ackMessage.getMessageOpCode()); //length 2
 
 
-            int messageLen = opCode.length+ackMessageBytes.length+messageOpCode.length+2;
+            int messageLen = opCode.length+ackMessageBytes.length+messageOpCode.length+1;
             result = new byte[messageLen];
             System.arraycopy(opCode,0,result,0,2);
             System.arraycopy(messageOpCode,0,result,2,2);
             System.arraycopy(ackMessageBytes,0,result,4,ackMessageBytes.length);
-            result[result.length-2]=0; // end of message
-            result[result.length-1]='\n'; // end of message
+            result[result.length-1]='\0'; // end of message
         }
         else if(message instanceof ErrorMessage){
             byte[] messageOpCode = shortToBytes( ((ErrorMessage) message).getMessageOpCode());
-            result = new byte[5];
+            result = new byte[4];
             System.arraycopy(opCode,0,result,0,2);
             System.arraycopy(messageOpCode,0,result,2,2);
-            result[result.length-1]='\n'; // end of message
         }
         return result;
     }
