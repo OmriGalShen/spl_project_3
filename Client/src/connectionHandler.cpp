@@ -63,7 +63,7 @@ bool ConnectionHandler::sendBytes(const char bytes[], int bytesToWrite) {
     return true;
 }
  
-bool ConnectionHandler::getLine(std::string& line) {
+bool ConnectionHandler::getLine(std::string& line,bool& terminate) {
     char ch;
     vector<char> bytes;
     short opCode = 0;
@@ -90,8 +90,10 @@ bool ConnectionHandler::getLine(std::string& line) {
     if(opCode==12) {// ACK message
         char messageCodeBytes[] = {bytes[2],bytes[3]};
         short messageCode = bytesToShort(messageCodeBytes);
-        if(messageCode==4) // ACK message from logout -> termination condition
+        if(messageCode==4){ // ACK message from logout -> termination condition
+            terminate=true;
             line = "TERMINATE";
+        }
         else{
         line = "ACK ";
         for(unsigned i=4;i<bytes.size();i++) // first 4 bytes reserved for op codes
@@ -148,13 +150,6 @@ bool ConnectionHandler::sendLine(std::string& line) {
     }
     // if opCode==11 then only opcode bytes needed to be send
     return true;
-}
- 
- 
-bool ConnectionHandler::sendFrameAscii(const std::string& frame, char delimiter) {
-	bool result=sendBytes(frame.c_str(),frame.length());
-	if(!result) return false;
-	return sendBytes(&delimiter,1);
 }
 
 // Close down the connection properly.
