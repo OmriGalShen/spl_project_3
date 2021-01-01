@@ -68,29 +68,26 @@ bool ConnectionHandler::getLine(std::string& line) {
     vector<char> bytes;
     short opCode = 0;
     char opCodeBytes[2];
-    // Stop when we encounter the null character.
-    // Notice that the null character is not appended to the frame string.
     try {
         do{
             if(!getBytes(&ch, 1))
             {
                 return false;
             }
-            bytes.push_back(ch);
-            if(bytes.size()==2){
+            bytes.push_back(ch); // we store the received bytes one by one
+            if(bytes.size()==2){ //determine opCode for termination condition
                 opCodeBytes[0] = bytes[0];
                 opCodeBytes[1] = bytes[1];
                 opCode = bytesToShort(opCodeBytes);
             }
-            if(opCode==13&&bytes.size()==4) //error message
+            if(opCode==13&&bytes.size()==4) //error message end condition
                 break;
-        }while (bytes.size()<=4||'\0' != ch);
+        }while (bytes.size()<=4||'\0' != ch); //first 4 bytes may contain '\0' byte, check for ACK message end condition
     } catch (std::exception& e) {
         std::cerr << "recv failed2 (Error: " << e.what() << ')' << std::endl;
         return false;
     }
     if(opCode==12) {// ACK message
-        std::cout << "Received ACK message" << std::endl;
         char messageCodeBytes[] = {bytes[2],bytes[3]};
         short messageCode = bytesToShort(messageCodeBytes);
         if(messageCode==4) // ACK message from logout -> termination condition
@@ -102,7 +99,6 @@ bool ConnectionHandler::getLine(std::string& line) {
         }
     }
     else if(opCode==13){// Error message
-        std::cout << "Received Error message" << std::endl;
         char messageCodeBytes[] = {bytes[2],bytes[3]};
         short messageCode = bytesToShort(messageCodeBytes);
         line = "ERROR "+std::to_string(messageCode);
@@ -151,28 +147,6 @@ bool ConnectionHandler::sendLine(std::string& line) {
 //        std::cerr << "course number: " << courseNumber << std::endl;
     }
     // if opCode==11 then only opcode bytes needed to be send
-    return true;
-}
- 
-
-bool ConnectionHandler::getFrameAscii(std::string& frame, char delimiter) {
-    char ch;
-    vector<char> bytes;
-    // Stop when we encounter the null character.
-    // Notice that the null character is not appended to the frame string.
-    try {
-	do{
-		if(!getBytes(&ch, 1))
-		{
-			return false;
-		}
-		frame.append(1, ch);
-        bytes.push_back(ch);
-	}while (delimiter != ch);
-    } catch (std::exception& e) {
-	std::cerr << "recv failed2 (Error: " << e.what() << ')' << std::endl;
-	return false;
-    }
     return true;
 }
  
