@@ -14,7 +14,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
     public RGRSMessage process(RGRSMessage msg) {
         short opCode = msg.getOpCode();
         RGRSMessage response = new ACKMessage((short) 12,msg.getOpCode(),"your message was received");;
-        //        RGRSMessage response = new ErrorMessage((short) 13,(short) 5);
+//        RGRSMessage response = new ErrorMessage((short) 13,opCode);
         ArrayList<String> operations;
         short courseNum;
         switch (opCode){
