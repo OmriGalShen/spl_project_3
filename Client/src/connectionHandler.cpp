@@ -66,6 +66,8 @@ bool ConnectionHandler::sendBytes(const char bytes[], int bytesToWrite) {
 bool ConnectionHandler::getLine(std::string& line) {
     char ch;
     vector<char> bytes;
+    short opCode = 0;
+    char opCodeBytes[2];
     // Stop when we encounter the null character.
     // Notice that the null character is not appended to the frame string.
     try {
@@ -75,22 +77,25 @@ bool ConnectionHandler::getLine(std::string& line) {
                 return false;
             }
             bytes.push_back(ch);
-        }while ('\n' != ch);
+            if(bytes.size()==2){
+                opCodeBytes[0] = bytes[0];
+                opCodeBytes[1] = bytes[1];
+                opCode = bytesToShort(opCodeBytes);
+            }
+        }while ('\0' != ch&&opCode!=13);
     } catch (std::exception& e) {
         std::cerr << "recv failed2 (Error: " << e.what() << ')' << std::endl;
         return false;
     }
-    char opCodeBytes[] = {bytes[0],bytes[1]};
-    short opCode = bytesToShort(opCodeBytes);
     if(opCode==12) {// ACK message
         char messageCodeBytes[] = {bytes[2],bytes[3]};
         short messageCode = bytesToShort(messageCodeBytes);
-        if(messageCode==4)
+        if(messageCode==4) // ACK message from logout -> termination condition
             line = "TERMINATE";
         else{
         line = "ACK ";
-        for(unsigned i=4;i<bytes.size();i++)
-            line.append(1,bytes[i]);
+        for(unsigned i=4;i<bytes.size();i++) // first 4 bytes reserved for op codes
+            line.append(1,bytes[i]); // ACK message additional string
         }
     }
     else if(opCode==13){// Error message
@@ -98,7 +103,7 @@ bool ConnectionHandler::getLine(std::string& line) {
         short messageCode = bytesToShort(messageCodeBytes);
         line = "ERROR "+std::to_string(messageCode);
     }
-    else return false;
+    else return false; //invalid Server to client opcode
     return true;
 }
 
@@ -141,11 +146,7 @@ bool ConnectionHandler::sendLine(std::string& line) {
         if(!result) return false;
 //        std::cerr << "course number: " << courseNumber << std::endl;
     }
-    // --   end message    -- //
-    char endByte={'\n'};
-    return sendBytes(&endByte,1);
-    // ----------------------------//
-
+    // if opCode==11 then only opcode bytes needed to be send
 }
  
 
