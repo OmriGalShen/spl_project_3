@@ -3,7 +3,7 @@
 #include <thread>
 #include <boost/thread.hpp>
 
-
+// This task is run by it's own thread, it handles the input reading from user loop
 void inputTask(ConnectionHandler& handler){
         while(1){
             try {
@@ -12,14 +12,9 @@ void inputTask(ConnectionHandler& handler){
                 std::cin.getline(buf, bufsize);
                 std::string line(buf);
 
-//                int len = line.length();
                 if (!handler.sendLine(line)) {
-//                    std::cout << "Disconnected. Exiting...\n" << std::endl;
                     break;
                 }
-
-                // connectionHandler.sendLine(line) appends '\n' to the message. Therefor we send len+1 bytes.
-//                std::cout << "Sent " << len + 1 << " bytes to server" << std::endl;
             }
             catch (boost::thread_interrupted&) {
                 break;
@@ -43,38 +38,29 @@ int main (int argc, char *argv[]) {
         return 1;
     }
 
-    // --       Run input output with multithreading     ---   //
+    // --       Read user input on it's own thread     ---   //
     boost::thread inputThread(&inputTask,boost::ref(connectionHandler));
 
+    // --       Read server responses loop     ---   //
     while(1){
-        // We can use one of three options to read data from the server:
-        // 1. Read a fixed number of characters
-        // 2. Read a line (up to the newline character using the getline() buffered reader
-        // 3. Read up to the null character
-        std::string answer;
-        bool terminate=false;
+        std::string answer; //server response to printed on client
+        bool terminate=false; //terminate condition for client
 
-        // Get back an answer: by using the expected number of bytes (len bytes + newline delimiter)
-        // We could also use: connectionHandler.getline(answer) and then get the answer without the newline char at the end
-        if (!connectionHandler.getLine(answer,terminate)) {
-            inputThread.interrupt();
-//            std::cout << "Disconnected. Exiting...\n" << std::endl;
+        if (!connectionHandler.getLine(answer,terminate)) { // read server response
+            // if this code was reached problem with receiving server response was occurred
+            inputThread.interrupt(); // stop reading user input
             break;
         }
 
-//        auto len = answer.length();
-        // A C string must end with a 0 char delimiter.  When we filled the answer buffer from the socket
-        // we filled up to the \n char - we must make sure now that a 0 char is also present. So we truncate last character.
-//        answer.resize(len - 1);
-        if (terminate) {
-            inputThread.interrupt();
+        if (terminate) { //
+            inputThread.interrupt(); // stop reading user input
             std::cout << "Exiting... press enter to exit\n" << std::endl;
             break;
         }
-        std::cout << answer  << std::endl;
+        std::cout << answer  << std::endl; //print server response
     }
 
-    inputThread.join();
+    inputThread.join(); // stop reading user input
     std::cerr << "Client terminated" << std::endl;
     return 0;
 }
