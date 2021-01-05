@@ -99,7 +99,7 @@ bool ConnectionHandler::getLine(std::string& line,bool& terminate) {
         if(messageCode==4)// ACK message from logout -> termination condition
             terminate=true;
         if(bytes.size()>5){ // optional message was received
-//            line += "\n";
+            line += "\n";
             for(unsigned i=4;i<bytes.size();i++) // first 4 bytes reserved for op codes
                 line.append(1,bytes[i]); // ACK message additional string
         }
