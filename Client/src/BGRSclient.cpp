@@ -42,8 +42,9 @@ int main (int argc, char *argv[]) {
     boost::thread inputThread(&inputTask,boost::ref(connectionHandler));
 
     // --       Read server responses loop     ---   //
+    std::string answer; //server response to printed on client
     while(1){
-        std::string answer; //server response to printed on client
+        answer = ""; // initialize string
         bool terminate=false; //terminate condition for client
 
         if (!connectionHandler.getLine(answer,terminate)) { // read server response
