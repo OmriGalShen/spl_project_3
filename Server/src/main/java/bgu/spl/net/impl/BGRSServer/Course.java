@@ -46,14 +46,15 @@ public class Course {
         this.kdamCoursesList = kdamCoursesList;
     }
 
-    public String getkdamString(){
-        String kdamString="[";
-        for(Integer course:kdamCoursesList){
-            kdamString+=course+",";
+    public static String coursesToString(ArrayList<Integer> courseList){
+        String courseString="[";
+        for(Integer course:courseList){
+            courseString+=course+",";
         }
-        if(kdamString.length()>1) //edge case
-            kdamString = kdamString.substring(0,kdamString.length()-1); // remove last ','
-        kdamString+="]";
-        return kdamString;
+        if(courseString.length()>1) //edge case
+            courseString = courseString.substring(0,courseString.length()-1); // remove last ','
+        courseString+="]";
+        return courseString;
+
     }
 }
