@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Database {
 	private ArrayList<Integer> coursesFileOrder; // used to order kdam courses
 	private HashMap<Integer,Course> courseDB; // courses database with course number as primary key
-	private HashMap<String,User> userDB; // user database with string name as primary key
+	private ConcurrentHashMap<String,User> userDB; // user database with string name as primary key
 	private ConcurrentHashMap<String,ArrayList<Integer>> userCourses; // user database with list of registered courses by number
 	private final String defaultPath = "Courses.txt";
 
@@ -30,7 +30,7 @@ public class Database {
 	//to prevent user from creating new Database
 	private Database() { // Only called once on first call of getInstance()
 		this.courseDB = new HashMap<>();
-		this.userDB = new HashMap<>();
+		this.userDB = new ConcurrentHashMap<>();
 		this.userCourses = new ConcurrentHashMap<>();
 		this.coursesFileOrder = new ArrayList<>();
 		initialize(defaultPath);
