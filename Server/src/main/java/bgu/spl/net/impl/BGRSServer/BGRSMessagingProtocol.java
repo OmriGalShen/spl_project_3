@@ -47,7 +47,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
     }
 
     private RGRSMessage adminRegistration(RequestMessage requestMessage){
-        // TODO
+        // should let register if user logged in?
         short opCode = 1;
         ArrayList<String> operations = requestMessage.getOperations();
         System.out.println("ADMINREG"); // debugging!
@@ -57,7 +57,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
     }
 
     private RGRSMessage studentRegistration(RequestMessage requestMessage){
-        // TODO
+        // should let register if user logged in?
         short opCode = 2;
         ArrayList<String> operations = requestMessage.getOperations();
         System.out.println("STUDENTREG"); // debugging!
@@ -67,6 +67,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
     }
 
     private RGRSMessage login(RequestMessage requestMessage) {
+        // should let login if user already logged in?
         short opCode = 3;
         ArrayList<String> operations = requestMessage.getOperations();
         System.out.println("LOGIN"); // debugging!
@@ -88,6 +89,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
     }
 
     private RGRSMessage courseRegistration(RequestMessage requestMessage){
+        // return error if course doesn't exist
         short opCode = 5;
         short courseNumber = requestMessage.getCourseNum();
         System.out.println("COURSEREG");// debugging!
@@ -101,6 +103,8 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
     }
 
     private RGRSMessage kdamCheck(RequestMessage requestMessage){
+        // should let check if user logged in?
+        // return error if course doesn't exist
         short opCode = 6;
         short courseNumber = requestMessage.getCourseNum();
         System.out.println("KDAMCHECK ");// debugging!
@@ -114,6 +118,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
     }
 
     private RGRSMessage courseState(RequestMessage requestMessage){
+        // return error if course doesn't exist
         short opCode = 7;
         short courseNumber = requestMessage.getCourseNum();
         System.out.println("COURSESTAT  ");// debugging!
@@ -142,6 +147,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
     }
 
     private RGRSMessage isRegistered(RequestMessage requestMessage){
+        // return error if course doesn't exist
         short opCode = 9;
         short courseNumber = requestMessage.getCourseNum();
         System.out.println("ISREGISTERED");// debugging!
@@ -155,6 +161,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
     }
 
     private RGRSMessage unRegister(RequestMessage requestMessage){
+        // return error if course doesn't exist
         short opCode = 10;
         short courseNumber = requestMessage.getCourseNum();
         System.out.println("UNREGISTER ");// debugging!
