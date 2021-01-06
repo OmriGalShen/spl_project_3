@@ -84,10 +84,10 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<RGRSMess
     }
 
     private RGRSMessage popMessage() {
-        RGRSMessage message = new RequestMessage();
-        if(this.len<2) // invalid message
-            return null;
         short opCode = bytesToShort(new byte[]{bytes[0], bytes[1]});
+        RequestMessage message = new RequestMessage();
+        message.setOpCode(opCode);
+
         if(opCode==1||opCode==2||opCode==3||opCode==8||opCode==4||opCode==11) { // request message
             // --    get operations --    //
             ArrayList<String> stringOperations = new ArrayList<>();
@@ -98,10 +98,10 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<RGRSMess
                     stringStart = i + 1;
                 }
             }
-            message = new RequestMessage(opCode,stringOperations);
+            message.setOperations(stringOperations);
         }else if(opCode==5||opCode==6||opCode==7||opCode==9||opCode==10) {// messages with course number
             short courseNum = bytesToShort(new byte[]{bytes[2],bytes[3]});
-            message = new CourseInfoMessage(opCode,courseNum);
+            message.setCourseNum(courseNum);
         }
         len=0; //reset position on bytes array
         return message;

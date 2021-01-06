@@ -1,7 +1,5 @@
 package bgu.spl.net.impl.BGRSServer.Messages;
 
-import bgu.spl.net.api.Message;
-
 public class ErrorMessage extends RGRSMessage {
     short messageOpCode;
 
