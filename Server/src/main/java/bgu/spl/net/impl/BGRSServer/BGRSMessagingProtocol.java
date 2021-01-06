@@ -49,6 +49,8 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
         // should let register if user logged in?
         short opCode = 1;
         ArrayList<String> operations = requestMessage.getOperations();
+        String username = operations.get(0);
+        String password = operations.get(1);
         System.out.println("ADMINREG"); // debugging!
         System.out.println("operations"); // debugging!
         operations.forEach(System.out::println); // debugging!
@@ -59,6 +61,8 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
         // should let register if user logged in?
         short opCode = 2;
         ArrayList<String> operations = requestMessage.getOperations();
+        String username = operations.get(0);
+        String password = operations.get(1);
         System.out.println("STUDENTREG"); // debugging!
         System.out.println("operations"); // debugging!
         operations.forEach(System.out::println); // debugging!
@@ -69,6 +73,8 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
         // should let login if user already logged in?
         short opCode = 3;
         ArrayList<String> operations = requestMessage.getOperations();
+        String username = operations.get(0);
+        String password = operations.get(1);
         System.out.println("LOGIN"); // debugging!
         System.out.println("operations"); // debugging!
         operations.forEach(System.out::println); // debugging!
@@ -133,7 +139,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
     private RGRSMessage studentStatus(RequestMessage requestMessage) {
         short opCode = 8;
         ArrayList<String> operations = requestMessage.getOperations();
-        short courseNumber = requestMessage.getCourseNum();
+        String username = operations.get(0);
         System.out.println("STUDENTSTAT"); // debugging!
         System.out.println("operations"); // debugging!
         operations.forEach(System.out::println); // debugging!
