@@ -1,10 +1,10 @@
-package bgu.spl.net.impl.BGRSServer.Database;
+package bgu.spl.net.impl.BGRSServer;
 
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Scanner;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Passive object representing the Database where all courses and users are stored.
@@ -15,15 +15,16 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * You can add private fields and methods to this class as you see fit.
  */
 public class Database {
-	private ConcurrentLinkedQueue<Course> courses;
+	private ArrayList<Course> courses;
+	private ArrayList<Integer> coursesFileOrder;
 
 	private static class DatabaseHolder { // singleton pattern
-		private static Database instance = new Database();
+		private static Database instance = new Database(); // Only happens once on first call of getInstance()
 	}
 
 	//to prevent user from creating new Database
 	private Database() {
-		// TODO: implement
+		initialize("Courses.txt"); // Only happens once on first call of getInstance()
 	}
 
 	/**
@@ -38,12 +39,14 @@ public class Database {
 	 * into the Database, returns true if successful.
 	 */
 	boolean initialize(String coursesFilePath) {
-		try (Scanner fileScanner= new Scanner(coursesFilePath)){ //auto close if problem occur
-			courses = new ConcurrentLinkedQueue<>();
+		coursesFileOrder = new ArrayList<>();// save the course number by the order in file
+		try (Scanner fileScanner= new Scanner(new File(coursesFilePath))){ //auto close if problem occur
+			courses = new ArrayList<>();
 			while (fileScanner.hasNextLine()){ //read line by line
 				// split course data based on format
 				// 42|How to Train Your Dragon|[43,2,32,39]|25
-				String courseData[] = fileScanner.nextLine().split("|");
+				String courseString = fileScanner.nextLine();
+				String[] courseData = courseString.split("\\|");
 				int courseNum = Integer.parseInt(courseData[0]);
 				String courseName = courseData[1];
 
@@ -52,15 +55,18 @@ public class Database {
 				String[] kdamString = temp.split(","); // get array of course numbers
 				ArrayList<Integer> kdamCoursesList = new ArrayList<>();
 				for (String s : kdamString) { // "build" kdamCoursesList
-					kdamCoursesList.add(Integer.parseInt(s));
+					if(s.length()>0)
+						kdamCoursesList.add(Integer.parseInt(s));
 				}
 
 				int numOfMaxStudents = Integer.parseInt(courseData[3]);
 				// Add new course
 				courses.add(new Course(courseNum,numOfMaxStudents,courseName,kdamCoursesList));
+				coursesFileOrder.add(courseNum);
 			}
-
-
+		courses.forEach(course -> // for every course sort kdam courses by the order in file
+				course.getKdamCoursesList()
+				.sort(Comparator.comparingInt(coursesFileOrder::indexOf)));
 
 			return true; //file read successful
 		}

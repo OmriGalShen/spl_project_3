@@ -1,4 +1,4 @@
-package bgu.spl.net.impl.BGRSServer.Database;
+package bgu.spl.net.impl.BGRSServer;
 
 public class User {
     private String username,password;

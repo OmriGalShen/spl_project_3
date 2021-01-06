@@ -4,6 +4,7 @@ import bgu.spl.net.srv.Server;
 
 public class ReactorMain {
     public static void main(String[] args) {
+        Database db = Database.getInstance();//initialize Database
         if (args.length < 2) {
             System.out.println("You must supply port and number of threads");
             return;

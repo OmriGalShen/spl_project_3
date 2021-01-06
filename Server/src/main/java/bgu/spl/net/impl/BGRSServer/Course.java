@@ -1,4 +1,4 @@
-package bgu.spl.net.impl.BGRSServer.Database;
+package bgu.spl.net.impl.BGRSServer;
 
 import java.util.ArrayList;
 
@@ -51,7 +51,8 @@ public class Course {
         for(Integer course:kdamCoursesList){
             kdamString+=course+",";
         }
-        kdamString = kdamString.substring(0,kdamString.length()-1); // remove last ','
+        if(kdamString.length()>1) //edge case
+            kdamString = kdamString.substring(0,kdamString.length()-1); // remove last ','
         kdamString+="]";
         return kdamString;
     }
