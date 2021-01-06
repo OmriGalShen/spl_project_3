@@ -1,7 +1,6 @@
 package bgu.spl.net.impl.BGRSServer;
 
 import bgu.spl.net.api.MessagingProtocol;
-import bgu.spl.net.impl.BGRSServer.Database.User;
 import bgu.spl.net.impl.BGRSServer.Messages.*;
 
 import java.util.ArrayList;
