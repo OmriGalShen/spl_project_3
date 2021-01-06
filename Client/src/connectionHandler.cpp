@@ -64,48 +64,50 @@ bool ConnectionHandler::sendBytes(const char bytes[], int bytesToWrite) {
 }
  
 bool ConnectionHandler::getLine(std::string& line,bool& terminate) {
-    char ch;
-    vector<char> bytes;
-    short opCode = 0;
-    char opCodeBytes[2];
+    char ch; // current byte
+    vector<char> bytes; //current bytes received by server
+    short opCode = 0, messageCode=0;
+    char opCodeBytes[2]; // temp array to get opcode
+    char messageCodeBytes[2]; // temp array to get message op code
     try {
         do{
             if(!getBytes(&ch, 1))
-            {
-                return false;
-            }
-            bytes.push_back(ch); // we store the received bytes one by one
-            if(bytes.size()==2){ //determine opCode for termination condition
+                return false; // problem reading bytes
+
+            bytes.push_back(ch); // store the received bytes one by one
+
+            if(bytes.size()==4){ //determine opCode for termination condition
                 opCodeBytes[0] = bytes[0];
                 opCodeBytes[1] = bytes[1];
-                opCode = bytesToShort(opCodeBytes);
+                messageCodeBytes[0]=bytes[2];
+                messageCodeBytes[1]=bytes[3];
+                opCode = bytesToShort(opCodeBytes); // get opCode as short
+                messageCode = bytesToShort(messageCodeBytes); // get message opCode as short
+                if(opCode==13) //error message end condition
+                    break;
             }
-            if(opCode==13&&bytes.size()==4) //error message end condition
-                break;
         }while (bytes.size()<=4||'\0' != ch); //first 4 bytes may contain '\0' byte, check for ACK message end condition
     } catch (std::exception& e) {
         std::cerr << "recv failed2 (Error: " << e.what() << ')' << std::endl;
         return false;
     }
+    if(opCode!=12&&opCode!=13)
+        return false; //invalid Server to client message
+
     if(opCode==12) {// ACK message
-        char messageCodeBytes[] = {bytes[2],bytes[3]};
-        short messageCode = bytesToShort(messageCodeBytes);
-        if(messageCode==4){ // ACK message from logout -> termination condition
+         line = "ACK "+std::to_string(messageCode);
+        if(messageCode==4)// ACK message from logout -> termination condition
             terminate=true;
-            line = "TERMINATE";
-        }
-        else{
-        line = "ACK ";
-        for(unsigned i=4;i<bytes.size();i++) // first 4 bytes reserved for op codes
-            line.append(1,bytes[i]); // ACK message additional string
+        if(bytes.size()>5){ // optional message was received
+            line += "\n";
+            for(unsigned i=4;i<bytes.size();i++) // first 4 bytes reserved for op codes
+                line.append(1,bytes[i]); // ACK message additional string
         }
     }
     else if(opCode==13){// Error message
-        char messageCodeBytes[] = {bytes[2],bytes[3]};
-        short messageCode = bytesToShort(messageCodeBytes);
         line = "ERROR "+std::to_string(messageCode);
     }
-    else return false; //invalid Server to client opcode
+
     return true;
 }
 

@@ -6,8 +6,8 @@ public class ACKMessage extends RGRSMessage {
     short messageOpCode;
     String ackMessage;
 
-    public ACKMessage(short opCode, short messageOpCode, String ackMessage) {
-        super(opCode);
+    public ACKMessage(short messageOpCode, String ackMessage) {
+        super((short)12);
         this.messageOpCode = messageOpCode;
         this.ackMessage = ackMessage;
     }
