@@ -1,14 +1,14 @@
 package bgu.spl.net.impl.BGRSServer;
 
 import bgu.spl.net.api.MessagingProtocol;
+import bgu.spl.net.impl.BGRSServer.Database.User;
 import bgu.spl.net.impl.BGRSServer.Messages.*;
 
 import java.util.ArrayList;
 
 public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
     private boolean shouldTerminate = false;
-    private boolean isLogin = false;
-    private boolean isAdmin = false;
+    private User currentUser=null;
 
     @Override
     public RGRSMessage process(RGRSMessage msg) {
@@ -48,82 +48,134 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
 
     private RGRSMessage adminRegistration(RequestMessage requestMessage){
         // TODO
+        short opCode = 1;
         ArrayList<String> operations = requestMessage.getOperations();
         System.out.println("ADMINREG"); // debugging!
         System.out.println("operations"); // debugging!
         operations.forEach(System.out::println); // debugging!
-        return new ACKMessage((short)1,"ADMINREG was received");
+        return new ACKMessage(opCode,"ADMINREG was received");
     }
 
     private RGRSMessage studentRegistration(RequestMessage requestMessage){
         // TODO
+        short opCode = 2;
         ArrayList<String> operations = requestMessage.getOperations();
         System.out.println("STUDENTREG"); // debugging!
         System.out.println("operations"); // debugging!
         operations.forEach(System.out::println); // debugging!
-        return new ACKMessage((short)2,"STUDENTREG was received");
+        return new ACKMessage(opCode,"STUDENTREG was received");
     }
 
     private RGRSMessage login(RequestMessage requestMessage) {
+        short opCode = 3;
         ArrayList<String> operations = requestMessage.getOperations();
         System.out.println("LOGIN"); // debugging!
         System.out.println("operations"); // debugging!
         operations.forEach(System.out::println); // debugging!
-        return new ACKMessage((short)3,"LOGIN was received");
+        return new ACKMessage(opCode,"LOGIN was received");
     }
 
     private RGRSMessage logout(){
+        short opCode = 4;
         System.out.println("LOGOUT");// debugging!
-        return new ACKMessage((short)4,"LOGOUT was received");
+        if(currentUser!=null){ //user is logged in
+            this.shouldTerminate=true;
+            return new ACKMessage(opCode,"LOGOUT was received");
+        }
+        else{ // user is not logged in
+            return new ErrorMessage(opCode);
+        }
     }
 
     private RGRSMessage courseRegistration(RequestMessage requestMessage){
+        short opCode = 5;
         short courseNumber = requestMessage.getCourseNum();
         System.out.println("COURSEREG");// debugging!
         System.out.println("courseNum:"+courseNumber);// debugging!
-        return new ACKMessage((short)5,"COURSEREG was received");
+        if(currentUser!=null){ //user is logged in
+            return new ACKMessage(opCode,"COURSEREG was received");
+        }
+        else{ // user is not logged in
+            return new ErrorMessage(opCode);
+        }
     }
 
     private RGRSMessage kdamCheck(RequestMessage requestMessage){
+        short opCode = 6;
         short courseNumber = requestMessage.getCourseNum();
         System.out.println("KDAMCHECK ");// debugging!
         System.out.println("courseNum:"+courseNumber);// debugging!
-        return new ACKMessage((short)6,"KDAMCHECK was received");
+        if(currentUser!=null){ //user is logged in
+            return new ACKMessage(opCode,"KDAMCHECK was received");
+        }
+        else{ // user is not logged in
+            return new ErrorMessage(opCode);
+        }
     }
 
     private RGRSMessage courseState(RequestMessage requestMessage){
+        short opCode = 7;
         short courseNumber = requestMessage.getCourseNum();
         System.out.println("COURSESTAT  ");// debugging!
         System.out.println("courseNum:"+courseNumber);// debugging!
-        return new ACKMessage((short)7,"COURSESTAT was received");
+        if(currentUser!=null){ //user is logged in
+            return new ACKMessage(opCode,"COURSESTAT was received");
+        }
+        else{ // user is not logged in
+            return new ErrorMessage(opCode);
+        }
     }
 
     private RGRSMessage studentStatus(RequestMessage requestMessage) {
+        short opCode = 8;
         ArrayList<String> operations = requestMessage.getOperations();
         short courseNumber = requestMessage.getCourseNum();
         System.out.println("STUDENTSTAT"); // debugging!
         System.out.println("operations"); // debugging!
         operations.forEach(System.out::println); // debugging!
-        return new ACKMessage((short)8,"STUDENTSTAT  was received");
+        if(currentUser!=null){ //user is logged in
+            return new ACKMessage(opCode,"STUDENTSTAT  was received");
+        }
+        else{ // user is not logged in
+            return new ErrorMessage(opCode);
+        }
     }
 
     private RGRSMessage isRegistered(RequestMessage requestMessage){
+        short opCode = 9;
         short courseNumber = requestMessage.getCourseNum();
         System.out.println("ISREGISTERED");// debugging!
         System.out.println("courseNum:"+courseNumber);// debugging!
-        return new ACKMessage((short)9,"ISREGISTERED  was received");
+        if(currentUser!=null){ //user is logged in
+            return new ACKMessage(opCode,"ISREGISTERED  was received");
+        }
+        else{ // user is not logged in
+            return new ErrorMessage(opCode);
+        }
     }
 
     private RGRSMessage unRegister(RequestMessage requestMessage){
+        short opCode = 10;
         short courseNumber = requestMessage.getCourseNum();
         System.out.println("UNREGISTER ");// debugging!
         System.out.println("courseNum:"+courseNumber);// debugging!
-        return new ACKMessage((short)10,"UNREGISTER was received");
+        if(currentUser!=null){ //user is logged in
+            return new ACKMessage(opCode,"UNREGISTER was received");
+        }
+        else{ // user is not logged in
+            return new ErrorMessage(opCode);
+        }
     }
 
     private RGRSMessage myCourses(){
+        short opCode = 11;
         System.out.println("MYCOURSES");// debugging!
-        return new ACKMessage((short)11,"MYCOURSES  was received");
+        if(currentUser!=null){ //user is logged in
+            return new ACKMessage(opCode,"MYCOURSES  was received");
+        }
+        else{ // user is not logged in
+            return new ErrorMessage(opCode);
+        }
     }
 
     @Override
