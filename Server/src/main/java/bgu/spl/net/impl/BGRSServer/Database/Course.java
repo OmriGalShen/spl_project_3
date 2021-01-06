@@ -5,9 +5,9 @@ import java.util.ArrayList;
 public class Course {
     private int courseNum,numOfMaxStudents;
     private String courseName;
-    private ArrayList<String> kdamCoursesList;
+    private ArrayList<Integer> kdamCoursesList;
 
-    public Course(int courseNum, int numOfMaxStudents, String courseName, ArrayList<String> kdamCoursesList) {
+    public Course(int courseNum, int numOfMaxStudents, String courseName, ArrayList<Integer> kdamCoursesList) {
         this.courseNum = courseNum;
         this.numOfMaxStudents = numOfMaxStudents;
         this.courseName = courseName;
@@ -38,20 +38,21 @@ public class Course {
         this.courseName = courseName;
     }
 
-    public ArrayList<String> getKdamCoursesList() {
+    public ArrayList<Integer> getKdamCoursesList() {
         return kdamCoursesList;
     }
 
-    public void setKdamCoursesList(ArrayList<String> kdamCoursesList) {
+    public void setKdamCoursesList(ArrayList<Integer> kdamCoursesList) {
         this.kdamCoursesList = kdamCoursesList;
     }
 
-    public String getKdamCoursesString(){
-        String kdamCourses="[";
-        for(String course:kdamCoursesList){
-            kdamCourses+=course;
+    public String getkdamString(){
+        String kdamString="[";
+        for(Integer course:kdamCoursesList){
+            kdamString+=course+",";
         }
-        kdamCourses+="]";
-        return kdamCourses;
+        kdamString = kdamString.substring(0,kdamString.length()-1); // remove last ','
+        kdamString+="]";
+        return kdamString;
     }
 }
