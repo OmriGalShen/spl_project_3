@@ -62,6 +62,6 @@ int main (int argc, char *argv[]) {
     }
 
     inputThread.join(); // stop reading user input
-    std::cerr << "Client terminated" << std::endl;
+    std::cout << "Client terminated" << std::endl;
     return 0;
 }

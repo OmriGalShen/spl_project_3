@@ -123,7 +123,6 @@ bool ConnectionHandler::sendLine(std::string& line) {
     }
     short opCode = stringToOpCode(strOpCode); // get op code
     if(opCode==0) return false; // op code not valid
-//    std::cerr << "opcode: " << opCode << std::endl;
     // -----------------------------//
 
     // --    send op code --  //
@@ -137,7 +136,6 @@ bool ConnectionHandler::sendLine(std::string& line) {
     if(opCode==1||opCode==2||opCode==3||opCode==8) { // messages with strings
         std::replace(line.begin(), line.end(), ' ', '\0'); //Replace spaces with \0
         line += '\0'; // add ending character
-//        std::cerr << "strings: " << line << std::endl;
 
         result=sendBytes(line.c_str(),line.length()); // send strings
         if(!result) return false;
@@ -148,7 +146,6 @@ bool ConnectionHandler::sendLine(std::string& line) {
         shortToBytes(courseNumber,codeBytesArr);
         bool result=sendBytes(codeBytesArr,2);
         if(!result) return false;
-//        std::cerr << "course number: " << courseNumber << std::endl;
     }
     // if opCode==11 then only opcode bytes needed to be send
     return true;
