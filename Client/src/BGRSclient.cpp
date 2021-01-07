@@ -53,12 +53,12 @@ int main (int argc, char *argv[]) {
             break;
         }
 
+        std::cout << answer  << std::endl; //print server response
         if (terminate) { //
             inputThread.interrupt(); // stop reading user input
             std::cout << "Exiting... press enter to exit\n" << std::endl;
             break;
         }
-        std::cout << answer  << std::endl; //print server response
     }
 
     inputThread.join(); // stop reading user input
