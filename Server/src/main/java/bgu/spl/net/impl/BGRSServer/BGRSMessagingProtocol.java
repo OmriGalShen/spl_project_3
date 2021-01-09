@@ -45,6 +45,13 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
         return response;
     }
 
+    /**
+     * An ADMINREG message is used to register an admin in the service. If the username is already registered in the server,
+     * an ERROR message is returned. If successful an ACK message will be sent in return. Both string parameters are a sequence
+     * of bytes in UTF-8 terminated by a zero byte (also known as the ‘\0’ char).
+     * @param requestMessage
+     * @return
+     */
     private RGRSMessage adminRegistration(RequestMessage requestMessage){
         // should let register if user logged in?
         short opCode = 1;
@@ -57,6 +64,12 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
         return new ACKMessage(opCode,"ADMINREG was received");
     }
 
+    /**
+     * A STUDENTREG message is used to register a student in the service. If the username is already registered in the server,
+     * an ERROR message is returned. If successful an ACK message will be sent in return.
+     * @param requestMessage
+     * @return
+     */
     private RGRSMessage studentRegistration(RequestMessage requestMessage){
         // should let register if user logged in?
         short opCode = 2;
@@ -69,6 +82,13 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
         return new ACKMessage(opCode,"STUDENTREG was received");
     }
 
+    /**
+     * A LOGIN message is used to login a user into the server. If the user doesn’t exist or the password
+     * doesn’t match the one entered for the username, sends an ERROR message.
+     * An ERROR message should also appear if the current client has already successfully logged in.
+     * @param requestMessage
+     * @return
+     */
     private RGRSMessage login(RequestMessage requestMessage) {
         // should let login if user already logged in?
         short opCode = 3;
@@ -81,6 +101,11 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
         return new ACKMessage(opCode,"LOGIN was received");
     }
 
+    /**
+     * Messages that appear only in a Client-to-Server communication. Informs the server on client disconnection.
+     * Client may terminate only after receiving an ACK message in replay. If no user is logged in, sends an ERROR message.
+     * @return
+     */
     private RGRSMessage logout(){
         short opCode = 4;
         System.out.println("LOGOUT");// debugging!
@@ -93,6 +118,16 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
         }
     }
 
+    /**
+     * Messages that appear only in a Client-to-Server communication.
+     * Inform the server about the course the student want to register to, if the registration done successfully,
+     * an ACK message will be sent back to the client, otherwise, (e.g. no such course is exist,
+     * no seats are available in this course, the student does not have all the Kdam courses, the student is not logged in)
+     * ERR message will be sent back.
+     * (Note: the admin can’t register to courses, in case the admin sends a COURSEREG message, and ERR message will be sent back to the client).
+     * @param requestMessage
+     * @return
+     */
     private RGRSMessage courseRegistration(RequestMessage requestMessage){
         // return error if course doesn't exist
         short opCode = 5;
@@ -107,6 +142,16 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
         }
     }
 
+    /**
+     *
+     Messages that appear only in a Client-to-Server communication.
+     KDAMCHECK this message checks what are the KDAM courses of the specified course.
+     If student registered to a course successfully, we consider him having this course as KDAM
+     When the server gets the message it returns the list of the KDAM courses, in the SAME ORDER as in the courses file
+     (if there are now KDAM courses it returns empty string)
+     * @param requestMessage
+     * @return
+     */
     private RGRSMessage kdamCheck(RequestMessage requestMessage){
         // should let check if user logged in?
         // return error if course doesn't exist
@@ -122,6 +167,19 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
         }
     }
 
+    /**
+     * The admin sends this message to the server to get the state of a specific course.
+     * the client should prints the state of the course as followed:
+     * Course: (<courseNum>) <courseName>
+     * Seats Available: <numOfSeatsAvailable> / <maxNumOfSeats>
+     * Students Registered: <listOfStudents> //ordered alphabetically
+     * Example:
+     * Course: (42) How To Train Your Dragon
+     * Seats Available: 22/25
+     * Students Registered: [ahufferson, hhhaddock, thevast] //if there are no students registered yet, simply print []
+     * @param requestMessage
+     * @return
+     */
     private RGRSMessage courseState(RequestMessage requestMessage){
         // return error if course doesn't exist
         short opCode = 7;
@@ -136,6 +194,17 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
         }
     }
 
+    /**
+     * A STUDENTSTAT message is used to receive a status about a specific student.
+     * the client should print the state of the course as followed:
+     * Student: <studentUsername>
+     * Courses: <listOfCoursesNumbersStudentRegisteredTo> //ordered in the same order as in the courses file
+     * Example:
+     *         Student: hhhaddock
+     *         Courses: [42] // if the student hasn’t registered to any course yet, simply print []
+     * @param requestMessage
+     * @return
+     */
     private RGRSMessage studentStatus(RequestMessage requestMessage) {
         short opCode = 8;
         ArrayList<String> operations = requestMessage.getOperations();
@@ -151,6 +220,13 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
         }
     }
 
+    /**
+     * An ISREGISTERED message is used to know if the student is registered to the specified course.
+     * The server send back “REGISTERED” if the student is already registered to the course,
+     * otherwise, it sends back “NOT REGISTERED”.
+     * @param requestMessage
+     * @return
+     */
     private RGRSMessage isRegistered(RequestMessage requestMessage){
         // return error if course doesn't exist
         short opCode = 9;
@@ -165,6 +241,12 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
         }
     }
 
+    /**
+     * An UNREGISTER message is used to unregister to a specific course
+     * The server sends back an ACK message if the registration process successfully done, otherwise, it sends back an ERR message.
+     * @param requestMessage
+     * @return
+     */
     private RGRSMessage unRegister(RequestMessage requestMessage){
         // return error if course doesn't exist
         short opCode = 10;
@@ -179,6 +261,12 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
         }
     }
 
+    /**
+     * A MYCOURSES message is used to know the courses the student has registered to.
+     * The server sends back a list of the courses number(in the format:[<coursenum1>,<coursenum2>])
+     * that the student has registered to (could be empty []).
+     * @return
+     */
     private RGRSMessage myCourses(){
         short opCode = 11;
         System.out.println("MYCOURSES");// debugging!
