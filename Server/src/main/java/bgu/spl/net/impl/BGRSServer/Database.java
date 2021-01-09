@@ -2,10 +2,7 @@ package bgu.spl.net.impl.BGRSServer;
 
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -153,15 +150,18 @@ public class Database {
 	/**
 	 * Get string describing list of stutends registred to course ordered alphabetically
 	 * Example:
-	 * Course: (42) How To Train Your Dragon
-	 * Seats Available: 22/25
 	 * Students Registered: [ahufferson, hhhaddock, thevast] //if there are no students registered yet, simply print []
 	 * @param courseNum
 	 * @return
 	 */
 	public String listOfStudents(int courseNum){
-		// TODO
-		return "";
+		ArrayList<String> userList = new ArrayList<>();
+		userCourses.forEach((username,courses)->{
+			if(courses.contains(courseNum)) // user registered to this course
+				userList.add(username); // add his name
+		});
+		Collections.sort(userList); // sort alphabetically
+		return User.usersToString(userList);
 	}
 
 }
