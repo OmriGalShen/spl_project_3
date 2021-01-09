@@ -1,5 +1,7 @@
 package bgu.spl.net.impl.BGRSServer;
 
+import java.util.ArrayList;
+
 public class User {
     private String username,password;
     private boolean isAdmin;
@@ -32,5 +34,17 @@ public class User {
 
     public void setAdmin(boolean admin) {
         isAdmin = admin;
+    }
+
+    public static String usersToString(ArrayList<String> userList){
+        String userString="[";
+        for(String course:userList){
+            userString+=course+",";
+        }
+        if(userString.length()>1) //edge case
+            userString = userString.substring(0,userString.length()-1); // remove last ','
+        userString+="]";
+        return userString;
+
     }
 }
