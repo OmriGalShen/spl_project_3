@@ -1,10 +1,8 @@
 package bgu.spl.net.impl.BGRSServer.Messages;
 
-import bgu.spl.net.api.Message;
-
 import java.util.ArrayList;
 
-public class RequestMessage extends RGRSMessage {
+public class RequestMessage extends BGRSMessage {
     ArrayList<String> operations;
     short courseNum;
 

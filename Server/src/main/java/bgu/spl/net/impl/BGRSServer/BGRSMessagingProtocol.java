@@ -5,17 +5,17 @@ import bgu.spl.net.impl.BGRSServer.Messages.*;
 
 import java.util.ArrayList;
 
-public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
+public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
     private boolean shouldTerminate = false;
     private User currentUser=null;
     private Database db;
 
     @Override
-    public RGRSMessage process(RGRSMessage msg) {
+    public BGRSMessage process(BGRSMessage msg) {
         this.db = Database.getInstance();
         RequestMessage requestMessage = (RequestMessage) msg;
         short opCode = msg.getOpCode();
-        RGRSMessage response = new ErrorMessage(opCode);
+        BGRSMessage response = new ErrorMessage(opCode);
         switch (opCode){
             case 1: //ADMINREG
                 return adminRegistration(requestMessage);
@@ -54,7 +54,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
      * @param requestMessage
      * @return
      */
-    private RGRSMessage adminRegistration(RequestMessage requestMessage){
+    private BGRSMessage adminRegistration(RequestMessage requestMessage){
         // should let register if user logged in?
         short opCode = 1;
         ArrayList<String> operations = requestMessage.getOperations();
@@ -78,7 +78,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
      * @param requestMessage
      * @return
      */
-    private RGRSMessage studentRegistration(RequestMessage requestMessage){
+    private BGRSMessage studentRegistration(RequestMessage requestMessage){
         // should let register if user logged in?
         short opCode = 2;
         ArrayList<String> operations = requestMessage.getOperations();
@@ -103,7 +103,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
      * @param requestMessage
      * @return
      */
-    private RGRSMessage login(RequestMessage requestMessage) {
+    private BGRSMessage login(RequestMessage requestMessage) {
         // should let login if user already logged in?
         short opCode = 3;
         ArrayList<String> operations = requestMessage.getOperations();
@@ -129,7 +129,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
      * Client may terminate only after receiving an ACK message in replay. If no user is logged in, sends an ERROR message.
      * @return
      */
-    private RGRSMessage logout(){
+    private BGRSMessage logout(){
         short opCode = 4;
         System.out.println("LOGOUT");// debugging!
         if(currentUser!=null){ //user is logged in
@@ -151,7 +151,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
      * @param requestMessage
      * @return
      */
-    private RGRSMessage courseRegistration(RequestMessage requestMessage){
+    private BGRSMessage courseRegistration(RequestMessage requestMessage){
         // return error if course doesn't exist
         short opCode = 5;
         short courseNumber = requestMessage.getCourseNum();
@@ -175,7 +175,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
      * @param requestMessage
      * @return
      */
-    private RGRSMessage kdamCheck(RequestMessage requestMessage){
+    private BGRSMessage kdamCheck(RequestMessage requestMessage){
         // should let check if user logged in?
         // return error if course doesn't exist
         short opCode = 6;
@@ -203,7 +203,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
      * @param requestMessage
      * @return
      */
-    private RGRSMessage courseState(RequestMessage requestMessage){
+    private BGRSMessage courseState(RequestMessage requestMessage){
         // return error if course doesn't exist
         short opCode = 7;
         short courseNumber = requestMessage.getCourseNum();
@@ -228,7 +228,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
      * @param requestMessage
      * @return
      */
-    private RGRSMessage studentStatus(RequestMessage requestMessage) {
+    private BGRSMessage studentStatus(RequestMessage requestMessage) {
         short opCode = 8;
         ArrayList<String> operations = requestMessage.getOperations();
         String username = operations.get(0);
@@ -250,7 +250,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
      * @param requestMessage
      * @return
      */
-    private RGRSMessage isRegistered(RequestMessage requestMessage){
+    private BGRSMessage isRegistered(RequestMessage requestMessage){
         // return error if course doesn't exist
         short opCode = 9;
         short courseNumber = requestMessage.getCourseNum();
@@ -270,7 +270,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
      * @param requestMessage
      * @return
      */
-    private RGRSMessage unRegister(RequestMessage requestMessage){
+    private BGRSMessage unRegister(RequestMessage requestMessage){
         // return error if course doesn't exist
         short opCode = 10;
         short courseNumber = requestMessage.getCourseNum();
@@ -290,7 +290,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
      * that the student has registered to (could be empty []).
      * @return
      */
-    private RGRSMessage myCourses(){
+    private BGRSMessage myCourses(){
         short opCode = 11;
         System.out.println("MYCOURSES");// debugging!
         if(currentUser!=null){ //user is logged in

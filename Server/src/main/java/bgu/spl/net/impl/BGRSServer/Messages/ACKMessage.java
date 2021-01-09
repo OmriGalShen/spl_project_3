@@ -1,8 +1,6 @@
 package bgu.spl.net.impl.BGRSServer.Messages;
 
-import bgu.spl.net.api.Message;
-
-public class ACKMessage extends RGRSMessage {
+public class ACKMessage extends BGRSMessage {
     short messageOpCode;
     String ackMessage;
 

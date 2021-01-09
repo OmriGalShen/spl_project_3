@@ -7,7 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<RGRSMessage> {
+public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<BGRSMessage> {
     private byte[] bytes = new byte[1 << 10]; //start with 1k
     private int len = 0;
 
@@ -37,7 +37,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<RGRSMess
     }
 
     @Override
-    public RGRSMessage decodeNextByte(byte nextByte) {
+    public BGRSMessage decodeNextByte(byte nextByte) {
         pushByte(nextByte);
         if(len>=2){ //check op code to determine pop condition
             short opCode = bytesToShort(new byte[]{bytes[0], bytes[1]}); //get op code
@@ -83,7 +83,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<RGRSMess
         bytes[len++] = nextByte;
     }
 
-    private RGRSMessage popMessage() {
+    private BGRSMessage popMessage() {
         short opCode = bytesToShort(new byte[]{bytes[0], bytes[1]});
         RequestMessage message = new RequestMessage();
         message.setOpCode(opCode);
@@ -108,7 +108,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<RGRSMess
     }
 
     @Override
-    public byte[] encode(RGRSMessage message) {
+    public byte[] encode(BGRSMessage message) {
 
 //        return (message + "\n").getBytes(); //uses utf8 by default
         byte[] result=null; // the return message

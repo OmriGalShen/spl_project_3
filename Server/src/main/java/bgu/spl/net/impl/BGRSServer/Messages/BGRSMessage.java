@@ -2,10 +2,10 @@ package bgu.spl.net.impl.BGRSServer.Messages;
 
 import bgu.spl.net.api.Message;
 
-public abstract class RGRSMessage implements Message<Short> {
+public abstract class BGRSMessage implements Message<Short> {
     short opCode;
 
-    public RGRSMessage(short opCode) {
+    public BGRSMessage(short opCode) {
         this.opCode = opCode;
     }
 
