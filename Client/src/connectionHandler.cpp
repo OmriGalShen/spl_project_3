@@ -135,7 +135,7 @@ bool ConnectionHandler::sendLine(std::string& line) {
         line += '\0'; // add ending character
 
         const char* strBytes = line.c_str(); // bytes array of the strings
-        int messageLength = 2+sizeof(strBytes); // full length of message with op code
+        unsigned messageLength = 2+strlen(strBytes); // full length of message with op code
         char messageBytes[messageLength]; // the full bytes array to send
         shortToBytes(opCode,messageBytes); // put opcode as first 2 bytes
         for(int i=2;i<messageLength;i++){
