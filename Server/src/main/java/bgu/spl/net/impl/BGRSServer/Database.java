@@ -17,7 +17,6 @@ public class Database {
 	private ArrayList<Integer> coursesFileOrder; // used to order kdam courses
 	private HashMap<Integer,Course> courseDB; // courses database with course number as primary key
 	private ConcurrentHashMap<String,User> userDB; // user database with string name as primary key
-	private ConcurrentHashMap<String,ArrayList<Integer>> userCourses; // user database with list of registered courses by number
 	private final String defaultPath = "Courses.txt";
 
 	private static class DatabaseHolder { // singleton pattern
@@ -28,7 +27,6 @@ public class Database {
 	private Database() { // Only called once on first call of getInstance()
 		this.courseDB = new HashMap<>();
 		this.userDB = new ConcurrentHashMap<>();
-		this.userCourses = new ConcurrentHashMap<>();
 		this.coursesFileOrder = new ArrayList<>();
 		initialize(defaultPath);
 	}
@@ -97,71 +95,22 @@ public class Database {
 
 	}
 
-	/**
-	 * Example for course : 35|Swordsmanship: From Hero to King|[82,30,12]|1
-	 * return [82,12,30] (the order is according to the order in the source file)
-	 * @param courseNum the course number of the course whose kdam is required
-	 * @return string describing the kdam courses
-	 */
-	public String getKdamCourses(int courseNum){
-		return Course.coursesToString(courseDB.get(courseNum).getKdamCoursesList());
-	}
-
-	/**
-	 * Return a String of the courses number(in the format:[<coursenum1>,<coursenum2>])
-	 * that the user has registered to (could be empty []).
-	 * @param username user to get courses from
-	 * @return String of the courses numbers
-	 */
-	public String getUserCourses(String username){
-		return Course.coursesToString(userCourses.get(username));
-	}
-
 	public boolean isRegistered(String username){
-		// TODO
-		return false;
+		return userDB.containsKey(username);
 	}
 
-	public void userRegister(String username, String password){
-		// TODO
+	public void userRegister(String username, String password,boolean isAdmin){
+		userDB.putIfAbsent(username,new User(username,password,isAdmin));
 	}
 
-	public void adminRegister(String username, String password){
-		// TODO
+	public void unRegisterCourse(String username,int courseNum){
+		courseDB.get(courseNum).unregisterUser(username);
+		userDB.remove(username);
 	}
 
-	public void unRegister(String username,int courseNum){
-		// TODO
-	}
+	public Course getCourse(int courseNum){return courseDB.get(courseNum);}
 
-	/**
-	 * for the received course return <numOfSeatsAvailable> / <maxNumOfSeats>
-	 * Example:
-	 * Course: (42) How To Train Your Dragon
-	 * Seats Available: 22/25
-	 * @param courseNum
-	 * @return
-	 */
-	public String getnumOfSeatsAvailable(int courseNum){
-		// TODO
-		return "";
-	}
+	public User getUser(String username){return userDB.get(username);}
 
-	/**
-	 * Get string describing list of stutends registred to course ordered alphabetically
-	 * Example:
-	 * Students Registered: [ahufferson, hhhaddock, thevast] //if there are no students registered yet, simply print []
-	 * @param courseNum
-	 * @return
-	 */
-	public String listOfStudents(int courseNum){
-		ArrayList<String> userList = new ArrayList<>();
-		userCourses.forEach((username,courses)->{
-			if(courses.contains(courseNum)) // user registered to this course
-				userList.add(username); // add his name
-		});
-		Collections.sort(userList); // sort alphabetically
-		return User.usersToString(userList);
-	}
 
 }
