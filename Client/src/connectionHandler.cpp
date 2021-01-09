@@ -118,33 +118,46 @@ bool ConnectionHandler::sendLine(std::string& line) {
     string strOpCode=line; // string with op code
 
     if(index != string::npos) {// a space was found
-        strOpCode = line.substr(0, line.find(" ")); // get substring with op code
+        strOpCode = line.substr(0, index); // get substring with op code
         line = line.substr(index + 1, line.length() - index); //remove op code from rest of the line
     }
     short opCode = stringToOpCode(strOpCode); // get op code
     if(opCode==0) return false; // op code not valid
     // -----------------------------//
 
-    // --    send op code --  //
-    char codeBytesArr[2];
-    shortToBytes(opCode,codeBytesArr);
-    bool result=sendBytes(codeBytesArr,2);
-    if(!result) return false;
+    // --    get opcode  bytes--  //
+//    char opcodeBytes[2];
+//    shortToBytes(opCode,opcodeBytes);
     // ----------------------------//
-
 
     if(opCode==1||opCode==2||opCode==3||opCode==8) { // messages with strings
         std::replace(line.begin(), line.end(), ' ', '\0'); //Replace spaces with \0
         line += '\0'; // add ending character
 
-        result=sendBytes(line.c_str(),line.length()); // send strings
+        const char* strBytes = line.c_str(); // bytes array of the strings
+        int messageLength = 2+sizeof(strBytes); // full length of message with op code
+        char messageBytes[messageLength]; // the full bytes array to send
+        shortToBytes(opCode,messageBytes); // put opcode as first 2 bytes
+        for(int i=2;i<messageLength;i++){
+            messageBytes[i]=strBytes[i-2];
+        }
+
+        bool result=sendBytes(messageBytes,messageLength); // send full message
         if(!result) return false;
     }
     else if(opCode==5||opCode==6||opCode==7||opCode==9||opCode==10){  // messages with course number
         short courseNumber = short(atoi( line.c_str() )); // //get course number as short
-        char codeBytesArr[2];
-        shortToBytes(courseNumber,codeBytesArr);
-        bool result=sendBytes(codeBytesArr,2);
+        char courseNumBytes[2];
+        shortToBytes(courseNumber,courseNumBytes);
+
+        int messageLength = 4; // 2 bytes for op code 2 bytes for course number
+        char messageBytes[messageLength]; // the full bytes array to send
+        shortToBytes(opCode,messageBytes); // put opcode as first 2 bytes
+        // put course number as last 2 bytes
+        messageBytes[2]=courseNumBytes[0];
+        messageBytes[3]=courseNumBytes[1];
+
+        bool result=sendBytes(messageBytes,messageLength); // send full message
         if(!result) return false;
     }
     // if opCode==11 then only opcode bytes needed to be send
