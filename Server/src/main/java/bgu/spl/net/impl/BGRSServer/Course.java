@@ -1,11 +1,16 @@
 package bgu.spl.net.impl.BGRSServer;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Course {
     private int courseNum,numOfMaxStudents;
     private String courseName;
     private ArrayList<Integer> kdamCoursesList;
+    private ConcurrentLinkedQueue<String> registeredUsers;
 
     public Course(int courseNum, int numOfMaxStudents, String courseName, ArrayList<Integer> kdamCoursesList) {
         this.courseNum = courseNum;
@@ -46,15 +51,27 @@ public class Course {
         this.kdamCoursesList = kdamCoursesList;
     }
 
-    public static String coursesToString(ArrayList<Integer> courseList){
-        String courseString="[";
-        for(Integer course:courseList){
-            courseString+=course+",";
-        }
-        if(courseString.length()>1) //edge case
-            courseString = courseString.substring(0,courseString.length()-1); // remove last ','
-        courseString+="]";
-        return courseString;
+    public void registerUser(String username){
+        this.registeredUsers.add(username);
+    }
 
+    public void unregisterUser(String username){
+        this.registeredUsers.remove(username);
+    }
+
+    public String getKdamString(){
+        return Database.listToString(kdamCoursesList);
+    }
+
+    /**
+     * Get string describing list of stutends registred to course ordered alphabetically
+     * Example:
+     * Students Registered: [ahufferson, hhhaddock, thevast] //if there are no students registered yet, simply print []
+     * @return string describing list of stutends registred to course rdered alphabetically
+     */
+    public String listOfStudents(){
+        ArrayList<String> userList = new ArrayList<>(registeredUsers);
+        Collections.sort(userList); // sort alphabetically
+        return Database.listToString(userList);
     }
 }

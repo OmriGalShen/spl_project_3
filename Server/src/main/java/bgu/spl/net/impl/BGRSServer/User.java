@@ -1,15 +1,19 @@
 package bgu.spl.net.impl.BGRSServer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class User {
     private String username,password;
     private boolean isAdmin;
+    private ArrayList<Integer> userCourses; // user database with list of registered courses by number
 
     public User(String username, String password, boolean isAdmin) {
         this.username = username;
         this.password = password;
         this.isAdmin = isAdmin;
+        this.userCourses = new ArrayList<>();
     }
 
     public String getUsername() {
@@ -36,15 +40,23 @@ public class User {
         isAdmin = admin;
     }
 
-    public static String usersToString(ArrayList<String> userList){
-        String userString="[";
-        for(String course:userList){
-            userString+=course+",";
-        }
-        if(userString.length()>1) //edge case
-            userString = userString.substring(0,userString.length()-1); // remove last ','
-        userString+="]";
-        return userString;
-
+    public void registerCourse(int courseNum){
+        userCourses.add(courseNum);
     }
+
+    public void unregisterCourse(int courseNum){
+        userCourses.remove(courseNum);
+    }
+
+    /**
+     * Return a String of the courses number(in the format:[<coursenum1>,<coursenum2>])
+     * that the user has registered to (could be empty []).
+     * @param username user to get courses from
+     * @return String of the courses numbers
+     */
+    public String getUserCourses(String username){
+        return Database.listToString(userCourses);
+    }
+
+
 }
