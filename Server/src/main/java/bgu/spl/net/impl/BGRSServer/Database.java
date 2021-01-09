@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * You can add private fields and methods to this class as you see fit.
  */
 public class Database {
-	private ArrayList<Integer> coursesFileOrder; // used to order kdam courses
+	private ArrayList<Integer> coursesFileOrder; // save courses order in the input file
 	private HashMap<Integer,Course> courseDB; // courses database with course number as primary key
 	private ConcurrentHashMap<String,User> userDB; // user database with string name as primary key
 	private final String defaultPath = "Courses.txt";
@@ -95,6 +95,11 @@ public class Database {
 
 	}
 
+	/**
+	 * Sort list of courses (by their Integer) according to their
+	 * order in the courses file
+	 * @param userCourses
+	 */
 	public void sortCourses(ArrayList<Integer> userCourses){
 		userCourses.sort(Comparator.comparingInt(coursesFileOrder::indexOf));
 	}
@@ -121,6 +126,14 @@ public class Database {
 
 	public User getUser(String username){return userDB.get(username);}
 
+	/**
+	 * A static helper function to convert Array list
+	 * of objects <1,2,3> to String format [1,2,3]
+	 * (could be empty [])
+	 * @param list
+	 * @param <T>
+	 * @return
+	 */
 	public static <T> String  listToString(ArrayList<T> list){
 		String listString="[";
 		for(Object obj:list){

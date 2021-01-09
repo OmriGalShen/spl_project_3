@@ -10,7 +10,7 @@ public class Course {
     private int courseNum,numOfMaxStudents;
     private String courseName;
     private ArrayList<Integer> kdamCoursesList;
-    private ConcurrentLinkedQueue<String> registeredUsers;
+    private ConcurrentLinkedQueue<String> registeredUsers; //multiple users accesses this list!
 
     public Course(int courseNum, int numOfMaxStudents, String courseName, ArrayList<Integer> kdamCoursesList) {
         this.courseNum = courseNum;
@@ -51,20 +51,34 @@ public class Course {
         this.kdamCoursesList = kdamCoursesList;
     }
 
-    public void registerUser(String username){
+    /**
+     * Add a username to the users list
+     * should not be accesses directly this is used by the database
+     * @param username
+     */
+    void registerUser(String username){
         this.registeredUsers.add(username);
     }
 
+    /**
+     * Remove a username to the users list
+     * should not be accesses directly this is used by the database
+     * @param username
+     */
     public void unregisterUser(String username){
         this.registeredUsers.remove(username);
     }
-
+    /*
+    * Get the course's kdam courses in the following format
+    * [82,12,30]. the courses list is sorted according to the order in the
+    * courses file. (could be empty [])
+     */
     public String getKdamString(){
         return Database.listToString(kdamCoursesList);
     }
 
     /**
-     * Get string describing list of stutends registred to course ordered alphabetically
+     * Get string describing list of students registered to course ordered alphabetically
      * Example:
      * Students Registered: [ahufferson, hhhaddock, thevast] //if there are no students registered yet, simply print []
      * @return string describing list of stutends registred to course rdered alphabetically
