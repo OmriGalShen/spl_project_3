@@ -59,6 +59,10 @@ public class Course {
         this.registeredUsers.remove(username);
     }
 
+    public String getKdamString(){
+        return Database.listToString(kdamCoursesList);
+    }
+
     /**
      * Get string describing list of stutends registred to course ordered alphabetically
      * Example:
@@ -68,13 +72,6 @@ public class Course {
     public String listOfStudents(){
         ArrayList<String> userList = new ArrayList<>(registeredUsers);
         Collections.sort(userList); // sort alphabetically
-        String userString="[";
-        for(String course:userList){
-            userString+=course+",";
-        }
-        if(userString.length()>1) //edge case
-            userString = userString.substring(0,userString.length()-1); // remove last ','
-        userString+="]";
-        return userString;
+        return Database.listToString(userList);
     }
 }

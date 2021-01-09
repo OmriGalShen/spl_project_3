@@ -105,12 +105,27 @@ public class Database {
 
 	public void unRegisterCourse(String username,int courseNum){
 		courseDB.get(courseNum).unregisterUser(username);
-		userDB.remove(username);
+		userDB.get(username).unregisterCourse(courseNum);
+	}
+
+	public void registerToCourse(String username,int courseNum){
+		courseDB.get(courseNum).registerUser(username);
+		userDB.get(username).registerCourse(courseNum);
 	}
 
 	public Course getCourse(int courseNum){return courseDB.get(courseNum);}
 
 	public User getUser(String username){return userDB.get(username);}
 
+	public static <T> String  listToString(ArrayList<T> list){
+		String listString="[";
+		for(Object obj:list){
+			listString+=obj+",";
+		}
+		if(listString.length()>1) //edge case
+			listString = listString.substring(0,listString.length()-1); // remove last ','
+		listString+="]";
+		return listString;
+	}
 
 }

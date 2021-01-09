@@ -40,6 +40,14 @@ public class User {
         isAdmin = admin;
     }
 
+    public void registerCourse(int courseNum){
+        userCourses.add(courseNum);
+    }
+
+    public void unregisterCourse(int courseNum){
+        userCourses.remove(courseNum);
+    }
+
     /**
      * Return a String of the courses number(in the format:[<coursenum1>,<coursenum2>])
      * that the user has registered to (could be empty []).
@@ -47,14 +55,7 @@ public class User {
      * @return String of the courses numbers
      */
     public String getUserCourses(String username){
-        String courseString="[";
-        for(Integer course:userCourses){
-            courseString+=course+",";
-        }
-        if(courseString.length()>1) //edge case
-            courseString = courseString.substring(0,courseString.length()-1); // remove last ','
-        courseString+="]";
-        return courseString;
+        return Database.listToString(userCourses);
     }
 
 
