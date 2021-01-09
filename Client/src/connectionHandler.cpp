@@ -125,20 +125,17 @@ bool ConnectionHandler::sendLine(std::string& line) {
     if(opCode==0) return false; // op code not valid
     // -----------------------------//
 
-    // --    get opcode  bytes--  //
-//    char opcodeBytes[2];
-//    shortToBytes(opCode,opcodeBytes);
-    // ----------------------------//
-
     if(opCode==1||opCode==2||opCode==3||opCode==8) { // messages with strings
+        int initialLength = line.length()+1; // how many bytes for strings
+
         std::replace(line.begin(), line.end(), ' ', '\0'); //Replace spaces with \0
         line += '\0'; // add ending character
 
         const char* strBytes = line.c_str(); // bytes array of the strings
-        unsigned messageLength = 2+strlen(strBytes); // full length of message with op code
+        unsigned messageLength = 2+initialLength; // full length of message with op code
         char messageBytes[messageLength]; // the full bytes array to send
         shortToBytes(opCode,messageBytes); // put opcode as first 2 bytes
-        for(int i=2;i<messageLength;i++){
+        for(unsigned int i=2;i<messageLength;i++){
             messageBytes[i]=strBytes[i-2];
         }
 
@@ -160,7 +157,12 @@ bool ConnectionHandler::sendLine(std::string& line) {
         bool result=sendBytes(messageBytes,messageLength); // send full message
         if(!result) return false;
     }
-    // if opCode==11 then only opcode bytes needed to be send
+    else if(opCode==11||opCode==4){ // messages with only opcode to send
+        char opcodeBytes[2];
+        shortToBytes(opCode,opcodeBytes);
+        bool result=sendBytes(opcodeBytes,2); // send full message
+        if(!result) return false;
+    }
     return true;
 }
 
