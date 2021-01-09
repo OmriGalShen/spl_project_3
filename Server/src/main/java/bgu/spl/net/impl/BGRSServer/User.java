@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class User {
     private String username,password;
     private boolean isAdmin;
-    private ArrayList<Integer> userCourses; // user database with list of registered courses by number
+    ArrayList<Integer> userCourses; // user database with list of registered courses by number
 
     public User(String username, String password, boolean isAdmin) {
         this.username = username;
@@ -54,7 +54,8 @@ public class User {
      * @param username user to get courses from
      * @return String of the courses numbers
      */
-    public String getUserCourses(String username){
+    public String getCoursesString(String username){
+        Database.getInstance().sortCourses(this.userCourses); // sort by file order
         return Database.listToString(userCourses);
     }
 

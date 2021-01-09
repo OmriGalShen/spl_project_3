@@ -95,6 +95,10 @@ public class Database {
 
 	}
 
+	public void sortCourses(ArrayList<Integer> userCourses){
+		userCourses.sort(Comparator.comparingInt(coursesFileOrder::indexOf));
+	}
+
 	public boolean isRegistered(String username){
 		return userDB.containsKey(username);
 	}
