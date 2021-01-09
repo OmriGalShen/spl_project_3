@@ -8,9 +8,11 @@ import java.util.ArrayList;
 public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
     private boolean shouldTerminate = false;
     private User currentUser=null;
+    private Database db;
 
     @Override
     public RGRSMessage process(RGRSMessage msg) {
+        this.db = Database.getInstance();
         RequestMessage requestMessage = (RequestMessage) msg;
         short opCode = msg.getOpCode();
         RGRSMessage response = new ErrorMessage(opCode);
@@ -61,6 +63,12 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
         System.out.println("ADMINREG"); // debugging!
         System.out.println("operations"); // debugging!
         operations.forEach(System.out::println); // debugging!
+
+        if(db.isRegistered(username))
+            return new ErrorMessage(opCode);
+
+        db.userRegister(username,password,true);
+
         return new ACKMessage(opCode,"ADMINREG was received");
     }
 
@@ -79,6 +87,12 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
         System.out.println("STUDENTREG"); // debugging!
         System.out.println("operations"); // debugging!
         operations.forEach(System.out::println); // debugging!
+
+        if(db.isRegistered(username))
+            return new ErrorMessage(opCode);
+
+        db.userRegister(username,password,false);
+
         return new ACKMessage(opCode,"STUDENTREG was received");
     }
 
@@ -98,6 +112,15 @@ public class BGRSMessagingProtocol implements MessagingProtocol<RGRSMessage>{
         System.out.println("LOGIN"); // debugging!
         System.out.println("operations"); // debugging!
         operations.forEach(System.out::println); // debugging!
+
+        if(!db.isRegistered(username))
+            return new ErrorMessage(opCode);
+
+        if(db.getUser(username).getPassword().equals(password)){
+            this.currentUser = db.getUser(username);
+        }
+        else return new ErrorMessage(opCode);
+
         return new ACKMessage(opCode,"LOGIN was received");
     }
 
