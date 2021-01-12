@@ -297,16 +297,16 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
 
         Course currCourse = db.getCourse(courseNumber);
         String courseName = currCourse.getCourseName();
-        String regStudents = currCourse.listOfStudents();
-        int numOfReg = currCourse.currNumOfStudents();
+        String studentsReg = currCourse.listOfStudents();
         int maxNumOfReg = currCourse.getNumOfMaxStudents();
+        int freeSeats = maxNumOfReg-currCourse.currNumOfStudents();
+
+        System.out.println("COURSESTAT  "); // debugging!
 
 
-
-        System.out.println("COURSESTAT  ");// debugging!
-        System.out.println("courseNum:"+courseNumber);// debugging!
-
-
+        System.out.println("Course: (" + courseNumber + ") " + courseName);
+        System.out.println("Seats Available: " + freeSeats + "/" + maxNumOfReg);
+        System.out.println("Students Registered: " + studentsReg);
         return new ACKMessage(opCode,"COURSESTAT was received");
     }
 
