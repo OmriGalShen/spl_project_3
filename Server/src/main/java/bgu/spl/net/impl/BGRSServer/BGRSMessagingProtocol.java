@@ -202,6 +202,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
             System.out.println("COURSEREG - this is an ADMIN!"); // debugging!
             return new ErrorMessage(opCode);
         }
+        String username = requestMessage.getOperations().get(0);
         short courseNumber = requestMessage.getCourseNum();
         if (db.getCourse(courseNumber) == null) { // this course doesn't exist
             System.out.println("COURSEREG - there is not such course"); // debugging!
@@ -213,13 +214,19 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
             System.out.println("COURSEREG - no seats are available in this course"); // debugging!
             return new ErrorMessage(opCode);
         }
+        String studentKdams = currentUser.getCoursesString(username);
+        String neededKdams = db.getCourse(courseNumber).getKdamString();
+        if (!studentKdams.equals(neededKdams)) { // the student doesn't have all the Kdam courses
+            System.out.println("COURSEREG - the student doesn't have all the Kdam courses"); // debugging!
+            return new ErrorMessage(opCode);
+        }
+        db.registerToCourse(username, courseNumber);
 
 
         System.out.println("COURSEREG"); // debugging!
         System.out.println("courseNum:"+courseNumber); // debugging!
 
 
-        db.registerToCourse(currentUser.getUsername(), courseNumber);
         return new ACKMessage(opCode,"COURSEREG was received");
 
 /*

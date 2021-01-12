@@ -122,9 +122,13 @@ public class Database {
 		userDB.get(username).registerCourse(courseNum);
 	}
 
-	public Course getCourse(int courseNum){return courseDB.get(courseNum);}
+	public Course getCourse(int courseNum) {
+		return courseDB.get(courseNum);
+	}
 
-	public User getUser(String username){return userDB.get(username);}
+	public User getUser(String username) {
+		return userDB.get(username);
+	}
 
 	/**
 	 * A static helper function to convert Array list
