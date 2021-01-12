@@ -108,6 +108,10 @@ public class Database {
 		return userDB.containsKey(username);
 	}
 
+	public boolean courseExist(int courseNum){
+		return courseDB.containsKey(courseNum);
+	}
+
 	public void userRegister(String username, String password,boolean isAdmin){
 		userDB.putIfAbsent(username,new User(username,password,isAdmin));
 	}

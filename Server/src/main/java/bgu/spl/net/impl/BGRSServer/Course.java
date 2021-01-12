@@ -7,17 +7,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Course {
-    private int courseNum, numOfMaxStudents, numOfRegStudents;
+    private int courseNum, numOfMaxStudents;
     private String courseName;
     private ArrayList<Integer> kdamCoursesList;
     private ConcurrentLinkedQueue<String> registeredUsers; //multiple users accesses this list!
-
+    private int numOfRegStudents;
     public Course(int courseNum, int numOfMaxStudents, String courseName, ArrayList<Integer> kdamCoursesList) {
         this.courseNum = courseNum;
         this.numOfMaxStudents = numOfMaxStudents;
         this.courseName = courseName;
         this.kdamCoursesList = kdamCoursesList;
-
+        this.registeredUsers = new ConcurrentLinkedQueue<>();
+        this.numOfRegStudents = 0;
     }
 
     public int getCourseNum() {
