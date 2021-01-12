@@ -172,13 +172,13 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
             System.out.println("LOGOUT - no user is logged in"); // debugging!
             return new ErrorMessage(opCode);
         }
+        this.shouldTerminate = true;
 
 
         System.out.println("LOGOUT"); // debugging!
 
 
-        this.shouldTerminate = true;
-        return new ACKMessage(opCode,"LOGOUT was received");        ///// the instructions says "Client may terminate only after receiving an ACK message in reply" so is that ok? - Eden /////
+        return new ACKMessage(opCode,"LOGOUT was received");   ///// the instructions says "Client may terminate only after receiving an ACK message in reply" so is that ok? - Eden /////
     }
 
 
