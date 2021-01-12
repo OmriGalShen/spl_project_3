@@ -330,17 +330,26 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
             System.out.println("STUDENTSTAT - no admin is logged in at the moment"); // debugging!
             return new ErrorMessage(opCode);
         }
+
         ArrayList<String> operations = requestMessage.getOperations();
         String username = operations.get(0);
-        System.out.println("STUDENTSTAT"); // debugging!
-        System.out.println("operations"); // debugging!
-        operations.forEach(System.out::println); // debugging!
-        if(currentUser!=null){ //user is logged in
-            return new ACKMessage(opCode,"STUDENTSTAT  was received");
-        }
-        else{ // user is not logged in
+        if (!db.isRegistered(username)) { // this user is not registered
+            System.out.println("STUDENTSTAT - this user is not registered"); // debugging!
             return new ErrorMessage(opCode);
         }
+        User currUser = db.getUser(username);
+        if (currUser.isAdmin()) { // this user is an admin
+            System.out.println("STUDENTSTAT - this user is an ADMIN!"); // debugging!
+            return new ErrorMessage(opCode);
+        }
+
+
+        System.out.println("STUDENTSTAT"); // debugging!
+
+
+        System.out.println("Student: " + username);
+        System.out.println("Courses: " + currUser.userCourses);
+        return new ACKMessage(opCode,"STUDENTSTAT  was received");
     }
 
 
