@@ -88,4 +88,8 @@ public class Course {
         Collections.sort(userList); // sort alphabetically
         return Database.listToString(userList);
     }
+
+    public int currNumOfStudents(){
+        return listOfStudents().length()+1;
+    }
 }

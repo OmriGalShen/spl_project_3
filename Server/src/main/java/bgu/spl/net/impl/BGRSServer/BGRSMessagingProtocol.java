@@ -194,32 +194,33 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
     private BGRSMessage courseRegistration(RequestMessage requestMessage) {
         // return error if course doesn't exist
         short opCode = 5;
-        if (currentUser == null) { // no user is logged in
-            System.out.println("COURSEREG - no user is logged in"); // debugging!
+        if (currentUser == null || currentUser.isAdmin()) { // no student is logged in
+            System.out.println("COURSEREG - no student is logged in"); // debugging!
             return new ErrorMessage(opCode);
         }
-        if (currentUser.isAdmin()) { // this user is an admin
-            System.out.println("COURSEREG - this is an ADMIN!"); // debugging!
-            return new ErrorMessage(opCode);
-        }
-        String username = requestMessage.getOperations().get(0);
+
         short courseNumber = requestMessage.getCourseNum();
         if (db.getCourse(courseNumber) == null) { // this course doesn't exist
             System.out.println("COURSEREG - there is not such course"); // debugging!
             return new ErrorMessage(opCode);
         }
-        int numOfMaxStudents = db.getCourse(courseNumber).getNumOfMaxStudents();
-        int numOfRegStudents = db.getCourse(courseNumber).listOfStudents().length()+1;
+
+        Course currCourse = db.getCourse(courseNumber);
+        int numOfMaxStudents = currCourse.getNumOfMaxStudents();
+        int numOfRegStudents = currCourse.currNumOfStudents();
         if (numOfMaxStudents <= numOfRegStudents) { // no seats are available in this course
             System.out.println("COURSEREG - no seats are available in this course"); // debugging!
             return new ErrorMessage(opCode);
         }
+
+        String username = requestMessage.getOperations().get(0);
         String studentKdams = currentUser.getCoursesString(username);
-        String neededKdams = db.getCourse(courseNumber).getKdamString();
+        String neededKdams = currCourse.getKdamString();
         if (!studentKdams.equals(neededKdams)) { // the student doesn't have all the Kdam courses
             System.out.println("COURSEREG - the student doesn't have all the Kdam courses"); // debugging!
             return new ErrorMessage(opCode);
         }
+
         db.registerToCourse(username, courseNumber);
 
 
@@ -228,14 +229,6 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
 
 
         return new ACKMessage(opCode,"COURSEREG was received");
-
-/*
-        we assume the input is valid
-        if(courseNumber < 0){ // invalid course number
-            System.out.println("the course number is invalid");// debugging!
-            return new ErrorMessage(opCode);
-        }
-*/
     }
 
 
@@ -256,14 +249,20 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
         // return error if course doesn't exist
         short opCode = 6;
         short courseNumber = requestMessage.getCourseNum();
-        System.out.println("KDAMCHECK ");// debugging!
-        System.out.println("courseNum:"+courseNumber);// debugging!
-        if(currentUser!=null){ //user is logged in
-            return new ACKMessage(opCode,"KDAMCHECK was received");
-        }
-        else{ // user is not logged in
+        if (db.getCourse(courseNumber) == null) { // this course doesn't exist
+            System.out.println("COURSEREG - there is not such course"); // debugging!
             return new ErrorMessage(opCode);
         }
+
+        System.out.println("KDAMCHECK - NOT WORKING YET");// debugging!
+//        System.out.println("courseNum:"+courseNumber);// debugging!
+//        if(currentUser!=null){ //user is logged in
+//            return new ACKMessage(opCode,"KDAMCHECK was received");
+//        }
+//        else{ // user is not logged in
+//
+//        }
+        return new ErrorMessage(opCode);
     }
 
 
@@ -285,15 +284,30 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
     private BGRSMessage courseState(RequestMessage requestMessage) {
         // return error if course doesn't exist
         short opCode = 7;
-        short courseNumber = requestMessage.getCourseNum();
-        System.out.println("COURSESTAT  ");// debugging!
-        System.out.println("courseNum:"+courseNumber);// debugging!
-        if(currentUser!=null){ //user is logged in
-            return new ACKMessage(opCode,"COURSESTAT was received");
-        }
-        else{ // user is not logged in
+        if (currentUser == null || !currentUser.isAdmin()) { // no admin is logged in at the moment
+            System.out.println("COURSESTAT - no admin is logged in at the moment"); // debugging!
             return new ErrorMessage(opCode);
         }
+
+        short courseNumber = requestMessage.getCourseNum();
+        if (db.getCourse(courseNumber) == null) { // there is no such course
+            System.out.println("COURSESTAT - there is no such course"); // debugging!
+            return new ErrorMessage(opCode);
+        }
+
+        Course currCourse = db.getCourse(courseNumber);
+        String courseName = currCourse.getCourseName();
+        String regStudents = currCourse.listOfStudents();
+        int numOfReg = currCourse.currNumOfStudents();
+        int maxNumOfReg = currCourse.getNumOfMaxStudents();
+
+
+
+        System.out.println("COURSESTAT  ");// debugging!
+        System.out.println("courseNum:"+courseNumber);// debugging!
+
+
+        return new ACKMessage(opCode,"COURSESTAT was received");
     }
 
 
