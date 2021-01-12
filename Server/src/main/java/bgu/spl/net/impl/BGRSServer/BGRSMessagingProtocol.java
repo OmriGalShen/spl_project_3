@@ -5,7 +5,7 @@ import bgu.spl.net.impl.BGRSServer.Messages.*;
 
 import java.util.ArrayList;
 
-public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
+public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
     private boolean shouldTerminate = false;
     private User currentUser = null;
     private Database db;
@@ -57,11 +57,11 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
      * @param requestMessage
      * @return
      */
-    private BGRSMessage adminRegistration(RequestMessage requestMessage){
+    private BGRSMessage adminRegistration(RequestMessage requestMessage) {
         // should let register if user logged in?                           ///// no. handled - Eden /////
         short opCode = 1;
         if (currentUser != null) {
-            System.out.println("ADMINREG - someone already did LOGIN"); // debugging!
+            System.out.println("ADMINREG - someone is already logged in"); // debugging!
             return new ErrorMessage(opCode);
         }
         ArrayList<String> operations = requestMessage.getOperations();
@@ -91,11 +91,11 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
      * @param requestMessage
      * @return
      */
-    private BGRSMessage studentRegistration(RequestMessage requestMessage){
+    private BGRSMessage studentRegistration(RequestMessage requestMessage) {
         // should let register if user logged in?                       ///// no. handled - Eden /////
         short opCode = 2;
         if (currentUser != null) {
-            System.out.println("STUDENTREG - someone already did LOGIN"); // debugging!
+            System.out.println("STUDENTREG - someone is already logged in"); // debugging!
             return new ErrorMessage(opCode);
         }
         ArrayList<String> operations = requestMessage.getOperations();
@@ -117,6 +117,8 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
     }
 
 
+
+
     /**
      * A LOGIN message is used to login a user into the server. If the user doesn’t exist or the password
      * doesn’t match the one entered for the username, sends an ERROR message.
@@ -125,45 +127,62 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
      * @return
      */
     private BGRSMessage login(RequestMessage requestMessage) {
-        // should let login if user already logged in?
+        // should let login if user already logged in?                                               ///// no. handled - Eden /////
         short opCode = 3;
+        if (currentUser != null) { // another user is already logged in
+            System.out.println("LOGIN - someone is already logged in"); // debugging!
+            return new ErrorMessage(opCode);
+        }
         ArrayList<String> operations = requestMessage.getOperations();
         String username = operations.get(0);
         String password = operations.get(1);
+
+        if (!db.isRegistered(username)) { // this user is not registered
+            System.out.println("LOGIN - this user is not registered"); // debugging!
+            return new ErrorMessage(opCode);
+        }
+
+        if(!db.getUser(username).getPassword().equals(password)) { // wrong password
+            System.out.println("LOGIN - wrong password"); // debugging!
+            return new ErrorMessage(opCode);
+        }
+
+        this.currentUser = db.getUser(username);
+
+
         System.out.println("LOGIN"); // debugging!
         System.out.println("operations"); // debugging!
         operations.forEach(System.out::println); // debugging!
 
-        if(currentUser != null)
-            return new ErrorMessage(opCode);
-
-        if(!db.isRegistered(username))
-            return new ErrorMessage(opCode);
-
-        if(db.getUser(username).getPassword().equals(password)){
-            this.currentUser = db.getUser(username);
-        }
-        else return new ErrorMessage(opCode);
 
         return new ACKMessage(opCode,"LOGIN was received");
     }
+
+
+
 
     /**
      * Messages that appear only in a Client-to-Server communication. Informs the server on client disconnection.
      * Client may terminate only after receiving an ACK message in replay. If no user is logged in, sends an ERROR message.
      * @return
      */
-    private BGRSMessage logout(){
+    private BGRSMessage logout() {
         short opCode = 4;
-        System.out.println("LOGOUT");// debugging!
-        if(currentUser != null){ //user is logged in
-            this.shouldTerminate = true;
-            return new ACKMessage(opCode,"LOGOUT was received");
-        }
-        else{ // user is not logged in
+        if (currentUser == null) { // no user is logged in
+            System.out.println("LOGOUT - no user is logged in"); // debugging!
             return new ErrorMessage(opCode);
         }
+
+
+        System.out.println("LOGOUT"); // debugging!
+
+
+        this.shouldTerminate = true;
+        return new ACKMessage(opCode,"LOGOUT was received");        ///// the instructions says "Client may terminate only after receiving an ACK message in reply" so is that ok? - Eden /////
     }
+
+
+
 
     /**
      * Messages that appear only in a Client-to-Server communication.
@@ -175,7 +194,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
      * @param requestMessage
      * @return
      */
-    private BGRSMessage courseRegistration(RequestMessage requestMessage){
+    private BGRSMessage courseRegistration(RequestMessage requestMessage) {
         // return error if course doesn't exist
         short opCode = 5;
         short courseNumber = requestMessage.getCourseNum();
@@ -202,6 +221,9 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
         }
     }
 
+
+
+
     /**
      *
      Messages that appear only in a Client-to-Server communication.
@@ -212,7 +234,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
      * @param requestMessage
      * @return
      */
-    private BGRSMessage kdamCheck(RequestMessage requestMessage){
+    private BGRSMessage kdamCheck(RequestMessage requestMessage) {
         // should let check if user logged in?
         // return error if course doesn't exist
         short opCode = 6;
@@ -227,6 +249,9 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
         }
     }
 
+
+
+
     /**
      * The admin sends this message to the server to get the state of a specific course.
      * the client should prints the state of the course as followed:
@@ -240,7 +265,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
      * @param requestMessage
      * @return
      */
-    private BGRSMessage courseState(RequestMessage requestMessage){
+    private BGRSMessage courseState(RequestMessage requestMessage) {
         // return error if course doesn't exist
         short opCode = 7;
         short courseNumber = requestMessage.getCourseNum();
@@ -253,6 +278,9 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
             return new ErrorMessage(opCode);
         }
     }
+
+
+
 
     /**
      * A STUDENTSTAT message is used to receive a status about a specific student.
@@ -280,6 +308,9 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
         }
     }
 
+
+
+
     /**
      * An ISREGISTERED message is used to know if the student is registered to the specified course.
      * The server send back “REGISTERED” if the student is already registered to the course,
@@ -287,7 +318,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
      * @param requestMessage
      * @return
      */
-    private BGRSMessage isRegistered(RequestMessage requestMessage){
+    private BGRSMessage isRegistered(RequestMessage requestMessage) {
         // return error if course doesn't exist
         short opCode = 9;
         short courseNumber = requestMessage.getCourseNum();
@@ -301,13 +332,17 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
         }
     }
 
+
+
+
+
     /**
      * An UNREGISTER message is used to unregister to a specific course
      * The server sends back an ACK message if the registration process successfully done, otherwise, it sends back an ERR message.
      * @param requestMessage
      * @return
      */
-    private BGRSMessage unRegister(RequestMessage requestMessage){
+    private BGRSMessage unRegister(RequestMessage requestMessage) {
         // return error if course doesn't exist
         short opCode = 10;
         short courseNumber = requestMessage.getCourseNum();
@@ -321,13 +356,16 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
         }
     }
 
+
+
+
     /**
      * A MYCOURSES message is used to know the courses the student has registered to.
      * The server sends back a list of the courses number(in the format:[<coursenum1>,<coursenum2>])
      * that the student has registered to (could be empty []).
      * @return
      */
-    private BGRSMessage myCourses(){
+    private BGRSMessage myCourses() {
         short opCode = 11;
         System.out.println("MYCOURSES");// debugging!
         if(currentUser!=null){ //user is logged in
