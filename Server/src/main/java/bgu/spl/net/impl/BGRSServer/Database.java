@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Database {
 	private ArrayList<Integer> coursesFileOrder; // save courses order in the input file
-	private HashMap<Integer,Course> courseDB; // courses database with course number as primary key
+	private ConcurrentHashMap<Integer,Course> courseDB; // courses database with course number as primary key
 	private ConcurrentHashMap<String,User> userDB; // user database with string name as primary key
 	private final String defaultPath = "Courses.txt";
 
@@ -25,7 +25,7 @@ public class Database {
 
 	//to prevent user from creating new Database
 	private Database() { // Only called once on first call of getInstance()
-		this.courseDB = new HashMap<>();
+		this.courseDB = new ConcurrentHashMap<>();
 		this.userDB = new ConcurrentHashMap<>();
 		this.coursesFileOrder = new ArrayList<>();
 		initialize(defaultPath);

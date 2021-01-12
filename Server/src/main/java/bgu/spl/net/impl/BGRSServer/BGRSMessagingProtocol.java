@@ -79,7 +79,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
         operations.forEach(System.out::println); // debugging!
 
 
-        return new ACKMessage(opCode,"ADMINREG was received");
+        return new ACKMessage(opCode,"");
     }
 
 
@@ -92,7 +92,6 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
      * @return
      */
     private BGRSMessage studentRegistration(RequestMessage requestMessage) {
-        // should let register if user logged in?                       ///// no. handled - Eden /////
         short opCode = 2;
         if (currentUser != null) {
             System.out.println("STUDENTREG - can't register: someone is already logged in"); // debugging!
@@ -113,7 +112,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
         operations.forEach(System.out::println); // debugging!
 
 
-        return new ACKMessage(opCode,"STUDENTREG was received");
+        return new ACKMessage(opCode,"");
     }
 
 
@@ -127,7 +126,6 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
      * @return
      */
     private BGRSMessage login(RequestMessage requestMessage) {
-        // should let login if user already logged in?                                               ///// no. handled - Eden /////
         short opCode = 3;
         if (currentUser != null) { // another user is already logged in
             System.out.println("LOGIN - someone is already logged in"); // debugging!
@@ -152,7 +150,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
         operations.forEach(System.out::println); // debugging!
 
 
-        return new ACKMessage(opCode,"LOGIN was received");
+        return new ACKMessage(opCode,"");
     }
 
 
@@ -175,7 +173,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
         System.out.println("LOGOUT"); // debugging!
 
 
-        return new ACKMessage(opCode,"LOGOUT was received");   ///// the instructions says "Client may terminate only after receiving an ACK message in reply" so is that ok? - Eden /////
+        return new ACKMessage(opCode,"");
     }
 
 
@@ -206,13 +204,13 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
 
         Course currCourse = db.getCourse(courseNumber);
         int numOfMaxStudents = currCourse.getNumOfMaxStudents();
-        int numOfRegStudents = currCourse.currNumOfStudents();
-        if (numOfMaxStudents <= numOfRegStudents) { // no seats are available in this course
+        int numOfRegStudents = currCourse.getNumOfRegStudents();
+        if (numOfMaxStudents-numOfRegStudents == 0) { // no seats are available in this course
             System.out.println("COURSEREG - no seats are available in this course"); // debugging!
             return new ErrorMessage(opCode);
         }
-
-        String username = requestMessage.getOperations().get(0);
+        ArrayList<String> operations = requestMessage.getOperations();
+        String username = currentUser.getUsername();
         String studentKdams = currentUser.getCoursesString(username);
         String neededKdams = currCourse.getKdamString();
         if (!studentKdams.equals(neededKdams)) { // the student doesn't have all the Kdam courses
@@ -227,7 +225,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
         System.out.println("courseNum:"+courseNumber); // debugging!
 
 
-        return new ACKMessage(opCode,"COURSEREG was received");
+        return new ACKMessage(opCode,"");
     }
 
 
@@ -261,8 +259,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
         System.out.println("KDAMCHECK");// debugging!
 
 
-        System.out.println(currCourse.getKdamCoursesList());
-        return new ACKMessage(opCode,"KDAMCHECK was received");
+        return new ACKMessage(opCode,currCourse.getKdamCoursesList().toString());
     }
 
 
@@ -299,15 +296,12 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
         String courseName = currCourse.getCourseName();
         String studentsReg = currCourse.listOfStudents();
         int maxNumOfReg = currCourse.getNumOfMaxStudents();
-        int freeSeats = maxNumOfReg-currCourse.currNumOfStudents();
+        int freeSeats = maxNumOfReg-currCourse.getNumOfRegStudents();
 
         System.out.println("COURSESTAT  "); // debugging!
 
 
-        System.out.println("Course: (" + courseNumber + ") " + courseName);
-        System.out.println("Seats Available: " + freeSeats + "/" + maxNumOfReg);
-        System.out.println("Students Registered: " + studentsReg);
-        return new ACKMessage(opCode,"COURSESTAT was received");
+        return new ACKMessage(opCode,"Course: (" + courseNumber + ") " + courseName + "/n" + "Seats Available: " + freeSeats + "/" + maxNumOfReg + "/n" + "Students Registered: " + studentsReg);
     }
 
 
