@@ -61,14 +61,14 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
         // should let register if user logged in?                           ///// no. handled - Eden /////
         short opCode = 1;
         if (currentUser != null) {
-            System.out.println("ADMINREG - someone is already logged in"); // debugging!
+            System.out.println("ADMINREG - can't register: someone is already logged in"); // debugging!
             return new ErrorMessage(opCode);
         }
         ArrayList<String> operations = requestMessage.getOperations();
         String username = operations.get(0);
         String password = operations.get(1);
         if (db.isRegistered(username)) {
-            System.out.println("ADMINREG - already registered"); // debugging!
+            System.out.println("ADMINREG - this user already registered"); // debugging!
             return new ErrorMessage(opCode);
         }
         db.userRegister(username,password,true);
@@ -95,14 +95,14 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
         // should let register if user logged in?                       ///// no. handled - Eden /////
         short opCode = 2;
         if (currentUser != null) {
-            System.out.println("STUDENTREG - someone is already logged in"); // debugging!
+            System.out.println("STUDENTREG - can't register: someone is already logged in"); // debugging!
             return new ErrorMessage(opCode);
         }
         ArrayList<String> operations = requestMessage.getOperations();
         String username = operations.get(0);
         String password = operations.get(1);
         if (db.isRegistered(username)) {
-            System.out.println("STUDENTREG - already registered"); // debugging!
+            System.out.println("STUDENTREG - can't register: this user is already registered"); // debugging!
             return new ErrorMessage(opCode);
         }
         db.userRegister(username,password,false);
