@@ -248,21 +248,26 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
         // should let check if user logged in?
         // return error if course doesn't exist
         short opCode = 6;
-        short courseNumber = requestMessage.getCourseNum();
-        if (db.getCourse(courseNumber) == null) { // this course doesn't exist
-            System.out.println("COURSEREG - there is not such course"); // debugging!
+        if (currentUser == null || !currentUser.isAdmin()) { // no admin is logged in at the moment
+            System.out.println("KDAMCHECK - no admin is logged in at the moment"); // debugging!
             return new ErrorMessage(opCode);
         }
 
-        System.out.println("KDAMCHECK - NOT WORKING YET");// debugging!
-//        System.out.println("courseNum:"+courseNumber);// debugging!
-//        if(currentUser!=null){ //user is logged in
-//            return new ACKMessage(opCode,"KDAMCHECK was received");
-//        }
-//        else{ // user is not logged in
-//
-//        }
-        return new ErrorMessage(opCode);
+        short courseNumber = requestMessage.getCourseNum();
+        if (db.getCourse(courseNumber) == null) { // this course doesn't exist
+            System.out.println("KDAMCHECK - there is not such course"); // debugging!
+            return new ErrorMessage(opCode);
+        }
+
+
+        System.out.println("KDAMCHECK");// debugging!
+
+
+        Course currCourse = db.getCourse(courseNumber);
+        System.out.println(currCourse.getKdamCoursesList());
+
+
+        return new ACKMessage(opCode,"KDAMCHECK was received");
     }
 
 
