@@ -202,6 +202,11 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
             return new ErrorMessage(opCode);
         }
 
+        if (currentUser.isRegistered(courseNumber)) { // the student is already registered to this course
+            System.out.println("COURSEREG - already registered"); // debugging!
+            return new ErrorMessage(opCode);
+        }
+
         Course currCourse = db.getCourse(courseNumber);
         int numOfMaxStudents = currCourse.getNumOfMaxStudents();
         int numOfRegStudents = currCourse.getNumOfRegStudents();
@@ -209,7 +214,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
             System.out.println("COURSEREG - no seats are available in this course"); // debugging!
             return new ErrorMessage(opCode);
         }
-        ArrayList<String> operations = requestMessage.getOperations();
+
         String username = currentUser.getUsername();
         String studentKdams = currentUser.getCoursesString(username);
         String neededKdams = currCourse.getKdamString();
@@ -392,21 +397,31 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
      * @return
      */
     private BGRSMessage unRegister(RequestMessage requestMessage) {
-        // return error if course doesn't exist
         short opCode = 10;
         if (currentUser == null || currentUser.isAdmin()) { // no student is logged in at the moment
             System.out.println("UNREGISTER - no admin is logged in at the moment"); // debugging!
             return new ErrorMessage(opCode);
         }
+
         short courseNumber = requestMessage.getCourseNum();
-        System.out.println("UNREGISTER ");// debugging!
-        System.out.println("courseNum:"+courseNumber);// debugging!
-        if(currentUser!=null){ //user is logged in
-            return new ACKMessage(opCode,"UNREGISTER was received");
-        }
-        else{ // user is not logged in
+        if (db.getCourse(courseNumber) == null) { // this course doesn't exist
+            System.out.println("UNREGISTER - there is not such course"); // debugging!
             return new ErrorMessage(opCode);
         }
+
+        if (!currentUser.isRegistered(courseNumber)) { // the student is not registered to this course
+            System.out.println("UNREGISTER - not registered"); // debugging!
+            return new ErrorMessage(opCode);
+        }
+
+        db.unRegisterCourse(currentUser.getUsername(), courseNumber);
+
+
+        System.out.println("UNREGISTER ");// debugging!
+        System.out.println("courseNum:"+courseNumber);// debugging!
+
+
+        return new ACKMessage(opCode,"");
     }
 
 
