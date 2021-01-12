@@ -136,17 +136,14 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
         ArrayList<String> operations = requestMessage.getOperations();
         String username = operations.get(0);
         String password = operations.get(1);
-
         if (!db.isRegistered(username)) { // this user is not registered
             System.out.println("LOGIN - this user is not registered"); // debugging!
             return new ErrorMessage(opCode);
         }
-
         if(!db.getUser(username).getPassword().equals(password)) { // wrong password
             System.out.println("LOGIN - wrong password"); // debugging!
             return new ErrorMessage(opCode);
         }
-
         this.currentUser = db.getUser(username);
 
 
@@ -197,28 +194,41 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
     private BGRSMessage courseRegistration(RequestMessage requestMessage) {
         // return error if course doesn't exist
         short opCode = 5;
+        if (currentUser == null) { // no user is logged in
+            System.out.println("COURSEREG - no user is logged in"); // debugging!
+            return new ErrorMessage(opCode);
+        }
+        if (currentUser.isAdmin()) { // this user is an admin
+            System.out.println("COURSEREG - this is an ADMIN!"); // debugging!
+            return new ErrorMessage(opCode);
+        }
         short courseNumber = requestMessage.getCourseNum();
-        System.out.println("COURSEREG");// debugging!
-        System.out.println("courseNum:"+courseNumber);// debugging!
+        if (db.getCourse(courseNumber) == null) { // this course doesn't exist
+            System.out.println("COURSEREG - there is not such course"); // debugging!
+            return new ErrorMessage(opCode);
+        }
+        int numOfMaxStudents = db.getCourse(courseNumber).getNumOfMaxStudents();
+        int numOfRegStudents = db.getCourse(courseNumber).listOfStudents().length()+1;
+        if (numOfMaxStudents <= numOfRegStudents) { // no seats are available in this course
+            System.out.println("COURSEREG - no seats are available in this course"); // debugging!
+            return new ErrorMessage(opCode);
+        }
+
+
+        System.out.println("COURSEREG"); // debugging!
+        System.out.println("courseNum:"+courseNumber); // debugging!
+
+
+        db.registerToCourse(currentUser.getUsername(), courseNumber);
+        return new ACKMessage(opCode,"COURSEREG was received");
+
+/*
+        we assume the input is valid
         if(courseNumber < 0){ // invalid course number
             System.out.println("the course number is invalid");// debugging!
             return new ErrorMessage(opCode);
         }
-        if(currentUser == null){ // no user is logged in
-            System.out.println("no user is logged in");// debugging!
-            return new ErrorMessage(opCode);
-        }
-        if(currentUser.isAdmin()){ // this is an admin!
-            System.out.println("this is an ADMIN!");// debugging!
-            return new ErrorMessage(opCode);
-        }
-        if(currentUser.isAdmin()){ // this is an admin!
-            return new ErrorMessage(opCode);
-        }
-        else{ // user is not logged in
-            return new ACKMessage(opCode,"COURSEREG was received");
-
-        }
+*/
     }
 
 
