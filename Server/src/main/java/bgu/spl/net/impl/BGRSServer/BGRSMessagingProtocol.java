@@ -58,7 +58,6 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
      * @return
      */
     private BGRSMessage adminRegistration(RequestMessage requestMessage) {
-        // should let register if user logged in?                           ///// no. handled - Eden /////
         short opCode = 1;
         if (currentUser != null) {
             System.out.println("ADMINREG - can't register: someone is already logged in"); // debugging!
@@ -346,9 +345,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
         System.out.println("STUDENTSTAT"); // debugging!
 
 
-        System.out.println("Student: " + username);
-        System.out.println("Courses: " + currUser.userCourses);
-        return new ACKMessage(opCode,"STUDENTSTAT  was received");
+        return new ACKMessage(opCode,"Student: " + username + "/n" + "Courses: " + currUser.userCourses);
     }
 
 
@@ -362,7 +359,6 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
      * @return
      */
     private BGRSMessage isRegistered(RequestMessage requestMessage) {
-        // return error if course doesn't exist
         short opCode = 9;
         if (currentUser == null || currentUser.isAdmin()) { // no student is logged in at the moment
             System.out.println("ISREGISTERED - no admin is logged in at the moment"); // debugging!
@@ -380,10 +376,9 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
 
 
         if (currentUser.isRegistered(courseNumber))
-            System.out.println("REGISTERED");
+            return new ACKMessage(opCode,"REGISTERED");
         else
-            System.out.println("NOT REGISTERED");
-        return new ACKMessage(opCode,"ISREGISTERED  was received");
+            return new ACKMessage(opCode,"NOT REGISTERED");
     }
 
 
@@ -439,13 +434,12 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
             System.out.println("MYCOURSES - no admin is logged in at the moment"); // debugging!
             return new ErrorMessage(opCode);
         }
+
+
         System.out.println("MYCOURSES");// debugging!
-        if(currentUser!=null){ //user is logged in
-            return new ACKMessage(opCode,"MYCOURSES  was received");
-        }
-        else{ // user is not logged in
-            return new ErrorMessage(opCode);
-        }
+
+
+        return new ACKMessage(opCode, currentUser.getCoursesString(currentUser.getUsername()));
     }
 
     @Override
