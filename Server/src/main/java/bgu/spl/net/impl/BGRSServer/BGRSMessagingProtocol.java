@@ -255,15 +255,13 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
             System.out.println("KDAMCHECK - there is not such course"); // debugging!
             return new ErrorMessage(opCode);
         }
+        Course currCourse = db.getCourse(courseNumber);
 
 
         System.out.println("KDAMCHECK");// debugging!
 
 
-        Course currCourse = db.getCourse(courseNumber);
         System.out.println(currCourse.getKdamCoursesList());
-
-
         return new ACKMessage(opCode,"KDAMCHECK was received");
     }
 
