@@ -370,14 +370,18 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
             return new ErrorMessage(opCode);
         }
         short courseNumber = requestMessage.getCourseNum();
-        System.out.println("ISREGISTERED");// debugging!
-        System.out.println("courseNum:"+courseNumber);// debugging!
-        if(currentUser!=null){ //user is logged in
-            return new ACKMessage(opCode,"ISREGISTERED  was received");
-        }
-        else{ // user is not logged in
-            return new ErrorMessage(opCode);
-        }
+        User currUser = db.getUser(requestMessage.getOperations().get(0));
+
+
+        System.out.println("ISREGISTERED"); // debugging!
+        System.out.println("courseNum:"+courseNumber); // debugging!
+
+
+        if (currUser.isRegistered(courseNumber))
+            System.out.println("REGISTERED");
+        else
+            System.out.println("NOT REGISTERED");
+        return new ACKMessage(opCode,"ISREGISTERED  was received");
     }
 
 

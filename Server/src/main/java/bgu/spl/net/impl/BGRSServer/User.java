@@ -59,5 +59,8 @@ public class User {
         return Database.listToString(userCourses);
     }
 
+    public boolean isRegistered(int courseNum) {
+        return this.userCourses.contains(courseNum);
+    }
 
 }
