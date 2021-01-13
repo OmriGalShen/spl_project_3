@@ -133,13 +133,13 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
             System.out.println("LOGIN - wrong password"); // debugging!
             return new ErrorMessage(opCode);
         }
-        if(db.getUser(username).getStat() == true) { // another client is currently logged in to this user
-            System.out.println("LOGIN - another client is currently logged in to this user"); // debugging!
-            return new ErrorMessage(opCode);
+        if(!db.getUser(username).getStat()) { // no client is currently logged in to this user
+            this.currentUser = db.getUser(username);
+            this.currentUser.setStat(true);
+            return new ACKMessage(opCode,"");
         }
-        this.currentUser = db.getUser(username);
-        this.currentUser.setStat(true);
-        return new ACKMessage(opCode,"");
+        System.out.println("LOGIN - another client is currently logged in to this user"); // debugging!
+        return new ErrorMessage(opCode);
     }
 
 
