@@ -305,7 +305,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
         System.out.println("COURSESTAT  "); // debugging!
 
 
-        return new ACKMessage(opCode,"Course: (" + courseNumber + ") " + courseName + "/n" + "Seats Available: " + freeSeats + "/" + maxNumOfReg + "/n" + "Students Registered: " + studentsReg);
+        return new ACKMessage(opCode,"Course: (" + courseNumber + ") " + courseName + "\n" + "Seats Available: " + freeSeats + "/" + maxNumOfReg + "\n" + "Students Registered: " + studentsReg);
     }
 
 
@@ -345,7 +345,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
         System.out.println("STUDENTSTAT"); // debugging!
 
 
-        return new ACKMessage(opCode,"Student: " + username + "/n" + "Courses: " + currUser.userCourses);
+        return new ACKMessage(opCode,"Student: " + username + "\n" + "Courses: " + currUser.getCoursesString(username));
     }
 
 
