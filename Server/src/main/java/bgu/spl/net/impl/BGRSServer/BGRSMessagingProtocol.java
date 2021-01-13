@@ -217,11 +217,20 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
         String username = currentUser.getUsername();
         String studentKdams = currentUser.getCoursesString(username);
         String neededKdams = currCourse.getKdamString();
-        if (!studentKdams.equals(neededKdams)) { // the student doesn't have all the Kdam courses
-            System.out.println("studentKdams: "+studentKdams); // debugging!
-            System.out.println("neededKdams: "+neededKdams); // debugging!
-            return new ErrorMessage(opCode);
+        ArrayList studentCourses = currentUser.getCourses(username);
+        ArrayList kdamList = currCourse.getKdamCoursesList();
+        for (Object course : kdamList) {
+            if (!studentCourses.contains(course)) { // the student doesn't have all the Kdam courses
+                System.out.println("COURSEREG - the student doesn't have all the Kdam courses"); // debugging!
+                return new ErrorMessage(opCode);
+            }
         }
+
+//        if (!studentKdams.equals(neededKdams)) {
+//            System.out.println("studentKdams: "+studentKdams); // debugging!
+//            System.out.println("neededKdams: "+neededKdams); // debugging!
+//            return new ErrorMessage(opCode);
+//        }
 
         db.registerToCourse(username, courseNumber);
 
