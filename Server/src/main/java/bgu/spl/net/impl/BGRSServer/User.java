@@ -45,7 +45,7 @@ public class User {
     }
 
     public void unregisterCourse(int courseNum){
-        userCourses.remove(courseNum);
+        userCourses.remove((Integer) courseNum);
     }
 
     /**
