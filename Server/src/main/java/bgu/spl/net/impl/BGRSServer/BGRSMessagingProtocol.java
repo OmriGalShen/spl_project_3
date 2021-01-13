@@ -102,11 +102,6 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
             return new ErrorMessage(opCode);
         }
         db.userRegister(username,password,false);
-
-
-        System.out.println("STUDENTREG"); // debugging!
-
-
         return new ACKMessage(opCode,"");
     }
 
@@ -143,11 +138,6 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
         }
         this.currentUser = db.getUser(username);
         this.currentUser.setStat(true);
-
-
-        System.out.println("LOGIN"); // debugging!
-
-
         return new ACKMessage(opCode,"");
     }
 
@@ -167,11 +157,6 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
         }
         this.currentUser.setStat(false);
         this.shouldTerminate = true;
-
-
-        System.out.println("LOGOUT"); // debugging!
-
-
         return new ACKMessage(opCode,"");
     }
 
@@ -224,12 +209,6 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
             }
         }
         db.registerToCourse(username, courseNumber);
-
-
-        System.out.println("COURSEREG"); // debugging!
-        System.out.println("courseNum:"+courseNumber); // debugging!
-
-
         return new ACKMessage(opCode,"");
     }
 
@@ -259,11 +238,6 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
             return new ErrorMessage(opCode);
         }
         Course currCourse = db.getCourse(courseNumber);
-
-
-        System.out.println("KDAMCHECK");// debugging!
-
-
         return new ACKMessage(opCode,currCourse.getKdamCoursesList().toString());
     }
 
@@ -303,9 +277,6 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
         int maxNumOfReg = currCourse.getNumOfMaxStudents();
         int freeSeats = maxNumOfReg-currCourse.getNumOfRegStudents();
 
-        System.out.println("COURSESTAT  "); // debugging!
-
-
         return new ACKMessage(opCode,"Course: (" + courseNumber + ") " + courseName + "\n" + "Seats Available: " + freeSeats + "/" + maxNumOfReg + "\n" + "Students Registered: " + studentsReg);
     }
 
@@ -341,11 +312,6 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
             System.out.println("STUDENTSTAT - this user is an ADMIN!"); // debugging!
             return new ErrorMessage(opCode);
         }
-
-
-        System.out.println("STUDENTSTAT"); // debugging!
-
-
         return new ACKMessage(opCode,"Student: " + username + "\n" + "Courses: " + currUser.getCoursesString(username));
     }
 
@@ -370,12 +336,6 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
             System.out.println("ISREGISTERED - this course does not exist"); // debugging!
             return new ErrorMessage(opCode);
         }
-
-
-        System.out.println("ISREGISTERED"); // debugging!
-        System.out.println("courseNum:"+courseNumber); // debugging!
-
-
         if (currentUser.isRegistered(courseNumber))
             return new ACKMessage(opCode,"REGISTERED");
         else
@@ -411,12 +371,6 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
         }
 
         db.unRegisterCourse(currentUser.getUsername(), courseNumber);
-
-
-        System.out.println("UNREGISTER ");// debugging!
-        System.out.println("courseNum:"+courseNumber);// debugging!
-
-
         return new ACKMessage(opCode,"");
     }
 
@@ -435,11 +389,6 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
             System.out.println("MYCOURSES - no admin is logged in at the moment"); // debugging!
             return new ErrorMessage(opCode);
         }
-
-
-        System.out.println("MYCOURSES");// debugging!
-
-
         return new ACKMessage(opCode, currentUser.getCoursesString(currentUser.getUsername()));
     }
 
