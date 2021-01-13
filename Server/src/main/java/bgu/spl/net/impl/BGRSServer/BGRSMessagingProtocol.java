@@ -118,28 +118,29 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
      */
     private BGRSMessage login(RequestMessage requestMessage) {
         short opCode = 3;
-        if (currentUser != null) { // another user is already logged in
-            System.out.println("LOGIN - someone is already logged in"); // debugging!
-            return new ErrorMessage(opCode);
+        if (currentUser != null) { // this client already logged in to a user
+            ArrayList<String> operations = requestMessage.getOperations();
+            String username = operations.get(0);
+            String password = operations.get(1);
+            if (!db.isRegistered(username)) { // this user is not registered
+                if(!db.getUser(username).getStat()) { // no other client is currently logged in to this user
+                    if(db.getUser(username).getPassword().equals(password)) { // wrong password
+                        this.currentUser = db.getUser(username);
+                        this.currentUser.setStat(true);
+                        return new ACKMessage(opCode,"");
+                    }
+                }
+            }
         }
-        ArrayList<String> operations = requestMessage.getOperations();
-        String username = operations.get(0);
-        String password = operations.get(1);
-        if (!db.isRegistered(username)) { // this user is not registered
-            System.out.println("LOGIN - this user is not registered"); // debugging!
-            return new ErrorMessage(opCode);
-        }
-        if(!db.getUser(username).getPassword().equals(password)) { // wrong password
-            System.out.println("LOGIN - wrong password"); // debugging!
-            return new ErrorMessage(opCode);
-        }
-        if(!db.getUser(username).getStat()) { // no client is currently logged in to this user
-            this.currentUser = db.getUser(username);
-            this.currentUser.setStat(true);
-            return new ACKMessage(opCode,"");
-        }
-        System.out.println("LOGIN - another client is currently logged in to this user"); // debugging!
         return new ErrorMessage(opCode);
+//
+//        System.out.println("LOGIN - someone is already logged in"); // debugging!
+//        System.out.println("LOGIN - this user is not registered"); // debugging!
+//        return new ErrorMessage(opCode);
+//
+//            System.out.println("LOGIN - wrong password"); // debugging!
+//            return new ErrorMessage(opCode);
+//
     }
 
 
@@ -152,13 +153,15 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
      */
     private BGRSMessage logout() {
         short opCode = 4;
-        if (currentUser == null) { // no user is logged in
-            System.out.println("LOGOUT - no user is logged in"); // debugging!
-            return new ErrorMessage(opCode);
+        if (currentUser != null) { // no user is logged in
+            this.currentUser.setStat(false);
+            this.shouldTerminate = true;
+            return new ACKMessage(opCode,"");
         }
-        this.currentUser.setStat(false);
-        this.shouldTerminate = true;
-        return new ACKMessage(opCode,"");
+        System.out.println("LOGOUT - no user is logged in"); // debugging!
+        return new ErrorMessage(opCode);
+
+
     }
 
 
