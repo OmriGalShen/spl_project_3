@@ -62,10 +62,9 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
         ArrayList<String> operations = requestMessage.getOperations();
         String username = operations.get(0);
         String password = operations.get(1);
-        if (currentUser == null) {
-            if (db.userRegister(username,password,true) == null) { // can't register: this user is already registered
+        if (currentUser == null) { // can't register: a user is already logged in
+            if (db.userRegister(username,password,true) == null) // can't register: this user is already registered
                 return new ACKMessage(opCode,"");
-            }
         }
         return new ErrorMessage(opCode);
     }
@@ -84,10 +83,9 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
         ArrayList<String> operations = requestMessage.getOperations();
         String username = operations.get(0);
         String password = operations.get(1);
-        if (currentUser == null) { // can't register: someone is already logged in
-            if (db.userRegister(username, password, false) == null) { // can't register: this user is already registered
+        if (currentUser == null) { // can't register: this user is already registered
+            if (db.userRegister(username, password, false) == null) // can't register: this user is already registered
                 return new ACKMessage(opCode, "");
-            }
         }
             return new ErrorMessage(opCode);
     }
@@ -104,13 +102,13 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
      */
     private BGRSMessage login(RequestMessage requestMessage) {
         short opCode = 3;
-        if (currentUser == null) { // this client already logged in to a user
-            ArrayList<String> operations = requestMessage.getOperations();
-            String username = operations.get(0);
-            String password = operations.get(1);
-            if (db.isRegistered(username)) { // this user is not registered
-                if(!db.getUser(username).getStat()) { // no other client is currently logged in to this user
-                    if(db.getUser(username).getPassword().equals(password)) { // wrong password
+        ArrayList<String> operations = requestMessage.getOperations();
+        String username = operations.get(0);
+        String password = operations.get(1);
+        if (currentUser == null) { // can't login: this client already logged in to a user
+            if (db.isRegistered(username)) { // can't login: this user is not registered
+                if(db.getUser(username).getPassword().equals(password)) { // can't login: wrong password
+                    if(!db.getUser(username).getStat()) { // can't login: other client is currently logged in to this user
                         this.db.getUser(username).setStat(true);
                         this.currentUser = db.getUser(username);
                         return new ACKMessage(opCode,"");
@@ -158,24 +156,20 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
     private BGRSMessage courseRegistration(RequestMessage requestMessage) {
         short opCode = 5;
         short courseNumber = requestMessage.getCourseNum();
-        if (currentUser != null && !currentUser.isAdmin()) { // no student is logged in
+        if (currentUser != null && !currentUser.isAdmin()) { // can't register: no student is logged in
             String username = currentUser.getUsername();
-            if (db.getCourse(courseNumber) != null) { // this course doesn't exist
+            if (db.getCourse(courseNumber) != null) { // can't register: this course doesn't exist
                 Course currCourse = db.getCourse(courseNumber);
-                if (!currentUser.isRegistered(courseNumber)) { // the student is already registered to this course
-                    int numOfMaxStudents = currCourse.getNumOfMaxStudents();
-                    int numOfRegStudents = currCourse.getNumOfRegStudents();
-                    if (numOfMaxStudents-numOfRegStudents > 0) { // no seats are available in this course
-                        ArrayList studentCourses = currentUser.getCourses(username);
-                        ArrayList kdamList = currCourse.getKdamCoursesList();
-                        for (Object course : kdamList) {
-                            if (!studentCourses.contains(course)) { // the student doesn't have all the Kdam courses
-                                System.out.println("COURSEREG - the student doesn't have all the Kdam courses"); // debugging!
-                                return new ErrorMessage(opCode);
-                            }
-                        }
+                if (!currentUser.isRegistered(courseNumber)) { // can't register: the student is already registered to this course
+                    ArrayList studentCourses = currentUser.getCourses(username);
+                    ArrayList kdamList = currCourse.getKdamCoursesList();
+                    for (Object course : kdamList) {
+                        if (!studentCourses.contains(course))  // can't register: the student doesn't have all the Kdam courses
+                            return new ErrorMessage(opCode);
+                    }
+                    if (currCourse.getNumOfMaxStudents() > currCourse.getNumOfRegStudents()) { // can't register: no seats are available in this course
                         db.registerToCourse(username, courseNumber);
-                        return new ACKMessage(opCode,"");
+                        return new ACKMessage(opCode, "");
                     }
                 }
             }
@@ -198,18 +192,14 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
      */
     private BGRSMessage kdamCheck(RequestMessage requestMessage) {
         short opCode = 6;
-        if (currentUser == null || currentUser.isAdmin()) { // no student is logged in at the moment
-            System.out.println("KDAMCHECK - no admin is logged in at the moment"); // debugging!
-            return new ErrorMessage(opCode);
-        }
-
         short courseNumber = requestMessage.getCourseNum();
-        if (db.getCourse(courseNumber) == null) { // this course doesn't exist
-            System.out.println("KDAMCHECK - there is not such course"); // debugging!
-            return new ErrorMessage(opCode);
+        if (db.getCourse(courseNumber) != null) { // can't check: this course doesn't exist
+            if (currentUser != null && !currentUser.isAdmin()) { // can't check: no student is logged in at the moment
+                Course currCourse = db.getCourse(courseNumber);
+                return new ACKMessage(opCode,currCourse.getKdamCoursesList().toString());
+            }
         }
-        Course currCourse = db.getCourse(courseNumber);
-        return new ACKMessage(opCode,currCourse.getKdamCoursesList().toString());
+        return new ErrorMessage(opCode);
     }
 
 
