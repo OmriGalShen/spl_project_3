@@ -219,26 +219,19 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
      * @return
      */
     private BGRSMessage courseState(RequestMessage requestMessage) {
-        // return error if course doesn't exist
         short opCode = 7;
-        if (currentUser == null || !currentUser.isAdmin()) { // no admin is logged in at the moment
-            System.out.println("COURSESTAT - no admin is logged in at the moment"); // debugging!
-            return new ErrorMessage(opCode);
-        }
-
         short courseNumber = requestMessage.getCourseNum();
-        if (db.getCourse(courseNumber) == null) { // there is no such course
-            System.out.println("COURSESTAT - there is no such course"); // debugging!
-            return new ErrorMessage(opCode);
+         // can't check: no admin is logged in at the moment
+        if (db.getCourse(courseNumber) != null) { // can't check: this course doesn't exist
+            Course currCourse = db.getCourse(courseNumber);
+            String courseName = currCourse.getCourseName();
+            String studentsReg = currCourse.listOfStudents();
+            int maxNumOfReg = currCourse.getNumOfMaxStudents();
+            int freeSeats = maxNumOfReg-currCourse.getNumOfRegStudents();
+            if (currentUser != null && currentUser.isAdmin())  // can't check: no admin is logged in at the moment
+                return new ACKMessage(opCode,"Course: (" + courseNumber + ") " + courseName + "\n" + "Seats Available: " + freeSeats + "/" + maxNumOfReg + "\n" + "Students Registered: " + studentsReg);
         }
-
-        Course currCourse = db.getCourse(courseNumber);
-        String courseName = currCourse.getCourseName();
-        String studentsReg = currCourse.listOfStudents();
-        int maxNumOfReg = currCourse.getNumOfMaxStudents();
-        int freeSeats = maxNumOfReg-currCourse.getNumOfRegStudents();
-
-        return new ACKMessage(opCode,"Course: (" + courseNumber + ") " + courseName + "\n" + "Seats Available: " + freeSeats + "/" + maxNumOfReg + "\n" + "Students Registered: " + studentsReg);
+        return new ErrorMessage(opCode);
     }
 
 
@@ -257,23 +250,17 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
      */
     private BGRSMessage studentStatus(RequestMessage requestMessage) {
         short opCode = 8;
-        if (currentUser == null || !currentUser.isAdmin()) { // no admin is logged in at the moment
-            System.out.println("STUDENTSTAT - no admin is logged in at the moment"); // debugging!
-            return new ErrorMessage(opCode);
-        }
-
         ArrayList<String> operations = requestMessage.getOperations();
         String username = operations.get(0);
-        if (!db.isRegistered(username)) { // this user is not registered
-            System.out.println("STUDENTSTAT - this user is not registered"); // debugging!
-            return new ErrorMessage(opCode);
+        if (currentUser != null && currentUser.isAdmin()) { // can't check: no admin is logged in at the moment
+            User currUser = db.getUser(username);
+            if (db.isRegistered(username)) { // can't check: this user is not registered
+                if (!currUser.isAdmin()) { // can't check: this user is an admin
+                    return new ACKMessage(opCode,"Student: " + username + "\n" + "Courses: " + currUser.getCoursesString(username));
+                }
+            }
         }
-        User currUser = db.getUser(username);
-        if (currUser.isAdmin()) { // this user is an admin
-            System.out.println("STUDENTSTAT - this user is an ADMIN!"); // debugging!
-            return new ErrorMessage(opCode);
-        }
-        return new ACKMessage(opCode,"Student: " + username + "\n" + "Courses: " + currUser.getCoursesString(username));
+        return new ErrorMessage(opCode);
     }
 
 
@@ -288,19 +275,16 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
      */
     private BGRSMessage isRegistered(RequestMessage requestMessage) {
         short opCode = 9;
-        if (currentUser == null || currentUser.isAdmin()) { // no student is logged in at the moment
-            System.out.println("ISREGISTERED - no admin is logged in at the moment"); // debugging!
-            return new ErrorMessage(opCode);
-        }
         short courseNumber = requestMessage.getCourseNum();
-        if (!db.courseExist(courseNumber)) { // this course does not exist
-            System.out.println("ISREGISTERED - this course does not exist"); // debugging!
-            return new ErrorMessage(opCode);
+        if (db.courseExist(courseNumber)) { // can't check: this course does not exist
+            if (currentUser != null && !currentUser.isAdmin()) { // can't check: no student is logged in at the moment
+                if (currentUser.isRegistered(courseNumber))
+                    return new ACKMessage(opCode,"REGISTERED");
+                else
+                    return new ACKMessage(opCode,"NOT REGISTERED");
+            }
         }
-        if (currentUser.isRegistered(courseNumber))
-            return new ACKMessage(opCode,"REGISTERED");
-        else
-            return new ACKMessage(opCode,"NOT REGISTERED");
+        return new ErrorMessage(opCode);
     }
 
 
@@ -316,9 +300,9 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
     private BGRSMessage unRegister(RequestMessage requestMessage) {
         short opCode = 10;
         short courseNumber = requestMessage.getCourseNum();
-        if (currentUser != null && !currentUser.isAdmin()) { // no student is logged in at the moment
-            if (db.getCourse(courseNumber) != null) { // this course doesn't exist
-                if (currentUser.isRegistered(courseNumber)) { // the student is not registered to this course
+        if (db.getCourse(courseNumber) != null) { // can't unregister: this course doesn't exist
+            if (currentUser != null && !currentUser.isAdmin()) { // can't unregister: no student is logged in at the moment
+                if (currentUser.isRegistered(courseNumber)) { // can't unregister: the student is not registered to this course
                     db.unRegisterCourse(currentUser.getUsername(), courseNumber);
                     return new ACKMessage(opCode,"");
                 }
@@ -338,10 +322,8 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
      */
     private BGRSMessage myCourses() {
         short opCode = 11;
-        if (currentUser == null || currentUser.isAdmin()) { // no student is logged in at the moment
-            System.out.println("MYCOURSES - no admin is logged in at the moment"); // debugging!
+        if (currentUser == null || currentUser.isAdmin()) // can't find courses: no student is logged in at the moment
             return new ErrorMessage(opCode);
-        }
         return new ACKMessage(opCode, currentUser.getCoursesString(currentUser.getUsername()));
     }
 
