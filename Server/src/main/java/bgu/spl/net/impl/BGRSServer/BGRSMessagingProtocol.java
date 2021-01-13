@@ -74,8 +74,6 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
 
 
         System.out.println("ADMINREG"); // debugging!
-        System.out.println("operations"); // debugging!
-        operations.forEach(System.out::println); // debugging!
 
 
         return new ACKMessage(opCode,"");
@@ -107,8 +105,6 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
 
 
         System.out.println("STUDENTREG"); // debugging!
-        System.out.println("operations"); // debugging!
-        operations.forEach(System.out::println); // debugging!
 
 
         return new ACKMessage(opCode,"");
@@ -141,12 +137,15 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
             System.out.println("LOGIN - wrong password"); // debugging!
             return new ErrorMessage(opCode);
         }
+        if(db.getUser(username).getStat() == true) { // another client is currently logged in to this user
+            System.out.println("LOGIN - another client is currently logged in to this user"); // debugging!
+            return new ErrorMessage(opCode);
+        }
         this.currentUser = db.getUser(username);
+        this.currentUser.setStat(true);
 
 
         System.out.println("LOGIN"); // debugging!
-        System.out.println("operations"); // debugging!
-        operations.forEach(System.out::println); // debugging!
 
 
         return new ACKMessage(opCode,"");
@@ -166,6 +165,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
             System.out.println("LOGOUT - no user is logged in"); // debugging!
             return new ErrorMessage(opCode);
         }
+        this.currentUser.setStat(false);
         this.shouldTerminate = true;
 
 
@@ -218,7 +218,8 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
         String studentKdams = currentUser.getCoursesString(username);
         String neededKdams = currCourse.getKdamString();
         if (!studentKdams.equals(neededKdams)) { // the student doesn't have all the Kdam courses
-            System.out.println("COURSEREG - the student doesn't have all the Kdam courses"); // debugging!
+            System.out.println("studentKdams: "+studentKdams); // debugging!
+            System.out.println("neededKdams: "+neededKdams); // debugging!
             return new ErrorMessage(opCode);
         }
 

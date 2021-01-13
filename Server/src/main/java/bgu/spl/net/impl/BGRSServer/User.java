@@ -8,12 +8,14 @@ public class User {
     private String username,password;
     private boolean isAdmin;
     ArrayList<Integer> userCourses; // user database with list of registered courses by number
+    private boolean loggedIn;
 
     public User(String username, String password, boolean isAdmin) {
         this.username = username;
         this.password = password;
         this.isAdmin = isAdmin;
         this.userCourses = new ArrayList<>();
+        this.loggedIn = false;
     }
 
     public String getUsername() {
@@ -47,6 +49,16 @@ public class User {
     public void unregisterCourse(int courseNum){
         userCourses.remove((Integer) courseNum);
     }
+
+    public boolean getStat() {
+        return loggedIn;
+    }
+
+    public void setStat(boolean stat) {
+        this.loggedIn = stat;
+    }
+
+
 
     /**
      * Return a String of the courses number(in the format:[<coursenum1>,<coursenum2>])
