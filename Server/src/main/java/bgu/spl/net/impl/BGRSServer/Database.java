@@ -112,8 +112,8 @@ public class Database {
 		return courseDB.containsKey(courseNum);
 	}
 
-	public void userRegister(String username, String password,boolean isAdmin){
-		userDB.putIfAbsent(username,new User(username,password,isAdmin));
+	public boolean userRegister(String username, String password,boolean isAdmin){
+		return (userDB.putIfAbsent(username,new User(username,password,isAdmin))==null);
 	}
 
 	public void unRegisterCourse(String username,int courseNum){

@@ -37,7 +37,7 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
                 return isRegistered(requestMessage);
             case 10: //UNREGISTER
                 return unRegister(requestMessage);
-            case 11: //MYCOURSES
+            case 11: //MYCOURSESadminRegistration
                 return myCourses();
             default: // opcode not valid
                 response = new ErrorMessage(msg.getOpCode());
@@ -66,15 +66,8 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
         ArrayList<String> operations = requestMessage.getOperations();
         String username = operations.get(0);
         String password = operations.get(1);
-        if (db.isRegistered(username)) {
-            System.out.println("ADMINREG - this user already registered"); // debugging!
+        if(!db.userRegister(username,password,true)) //can't register: this user is already registered
             return new ErrorMessage(opCode);
-        }
-        db.userRegister(username,password,true);
-
-
-        System.out.println("ADMINREG"); // debugging!
-
 
         return new ACKMessage(opCode,"");
     }
@@ -97,11 +90,8 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
         ArrayList<String> operations = requestMessage.getOperations();
         String username = operations.get(0);
         String password = operations.get(1);
-        if (db.isRegistered(username)) {
-            System.out.println("STUDENTREG - can't register: this user is already registered"); // debugging!
+        if(!db.userRegister(username,password,false)) //can't register: this user is already registered
             return new ErrorMessage(opCode);
-        }
-        db.userRegister(username,password,false);
         return new ACKMessage(opCode,"");
     }
 
@@ -132,12 +122,15 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
             System.out.println("LOGIN - wrong password"); // debugging!
             return new ErrorMessage(opCode);
         }
-        if(db.getUser(username).getStat() == true) { // another client is currently logged in to this user
-            System.out.println("LOGIN - another client is currently logged in to this user"); // debugging!
-            return new ErrorMessage(opCode);
+        User loginUser = db.getUser(username);
+        synchronized (loginUser) {
+            if (loginUser.getStat() == true) { // another client is currently logged in to this user
+                System.out.println("LOGIN - another client is currently logged in to this user"); // debugging!
+                return new ErrorMessage(opCode);
+            }
+            this.currentUser = db.getUser(username);
+            this.currentUser.setStat(true);
         }
-        this.currentUser = db.getUser(username);
-        this.currentUser.setStat(true);
         return new ACKMessage(opCode,"");
     }
 
