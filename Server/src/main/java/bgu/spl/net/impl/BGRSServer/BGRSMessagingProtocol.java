@@ -215,8 +215,6 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
         }
 
         String username = currentUser.getUsername();
-        String studentKdams = currentUser.getCoursesString(username);
-        String neededKdams = currCourse.getKdamString();
         ArrayList studentCourses = currentUser.getCourses(username);
         ArrayList kdamList = currCourse.getKdamCoursesList();
         for (Object course : kdamList) {
@@ -225,13 +223,6 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
                 return new ErrorMessage(opCode);
             }
         }
-
-//        if (!studentKdams.equals(neededKdams)) {
-//            System.out.println("studentKdams: "+studentKdams); // debugging!
-//            System.out.println("neededKdams: "+neededKdams); // debugging!
-//            return new ErrorMessage(opCode);
-//        }
-
         db.registerToCourse(username, courseNumber);
 
 
