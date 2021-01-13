@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Database {
 	private ArrayList<Integer> coursesFileOrder; // save courses order in the input file
-	private HashMap<Integer,Course> courseDB; // courses database with course number as primary key
+	private ConcurrentHashMap<Integer,Course> courseDB; // courses database with course number as primary key
 	private ConcurrentHashMap<String,User> userDB; // user database with string name as primary key
 	private final String defaultPath = "Courses.txt";
 
@@ -25,7 +25,7 @@ public class Database {
 
 	//to prevent user from creating new Database
 	private Database() { // Only called once on first call of getInstance()
-		this.courseDB = new HashMap<>();
+		this.courseDB = new ConcurrentHashMap<>();
 		this.userDB = new ConcurrentHashMap<>();
 		this.coursesFileOrder = new ArrayList<>();
 		initialize(defaultPath);
@@ -108,6 +108,10 @@ public class Database {
 		return userDB.containsKey(username);
 	}
 
+	public boolean courseExist(int courseNum){
+		return courseDB.containsKey(courseNum);
+	}
+
 	public void userRegister(String username, String password,boolean isAdmin){
 		userDB.putIfAbsent(username,new User(username,password,isAdmin));
 	}
@@ -122,9 +126,13 @@ public class Database {
 		userDB.get(username).registerCourse(courseNum);
 	}
 
-	public Course getCourse(int courseNum){return courseDB.get(courseNum);}
+	public Course getCourse(int courseNum) {
+		return courseDB.get(courseNum);
+	}
 
-	public User getUser(String username){return userDB.get(username);}
+	public User getUser(String username) {
+		return userDB.get(username);
+	}
 
 	/**
 	 * A static helper function to convert Array list

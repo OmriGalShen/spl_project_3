@@ -7,16 +7,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Course {
-    private int courseNum,numOfMaxStudents;
+    private int courseNum, numOfMaxStudents;
     private String courseName;
     private ArrayList<Integer> kdamCoursesList;
     private ConcurrentLinkedQueue<String> registeredUsers; //multiple users accesses this list!
-
+    private int numOfRegStudents;
     public Course(int courseNum, int numOfMaxStudents, String courseName, ArrayList<Integer> kdamCoursesList) {
         this.courseNum = courseNum;
         this.numOfMaxStudents = numOfMaxStudents;
         this.courseName = courseName;
         this.kdamCoursesList = kdamCoursesList;
+        this.registeredUsers = new ConcurrentLinkedQueue<>();
+        this.numOfRegStudents = 0;
     }
 
     public int getCourseNum() {
@@ -29,6 +31,10 @@ public class Course {
 
     public int getNumOfMaxStudents() {
         return numOfMaxStudents;
+    }
+
+    public int getNumOfRegStudents() {
+        return numOfRegStudents;
     }
 
     public void setNumOfMaxStudents(int numOfMaxStudents) {
@@ -58,6 +64,7 @@ public class Course {
      */
     void registerUser(String username){
         this.registeredUsers.add(username);
+        this.numOfRegStudents++;
     }
 
     /**
@@ -67,6 +74,7 @@ public class Course {
      */
     public void unregisterUser(String username){
         this.registeredUsers.remove(username);
+        this.numOfRegStudents--;
     }
     /*
     * Get the course's kdam courses in the following format

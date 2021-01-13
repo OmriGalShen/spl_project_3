@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<BGRSMessage> {
-    private byte[] bytes = new byte[1 << 10]; //start with 1k
+    private byte[] bytes = new byte[1 << 10]; // start with 1k
     private int len = 0;
 
     /**
@@ -39,17 +39,17 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<BGRSMess
     @Override
     public BGRSMessage decodeNextByte(byte nextByte) {
         pushByte(nextByte);
-        if(len>=2){ //check op code to determine pop condition
+        if(len >= 2){ //check op code to determine pop condition
             short opCode = bytesToShort(new byte[]{bytes[0], bytes[1]}); //get op code
             switch (opCode){
                 case 1: //ADMINREG
                 case 2: //STUDENTREG
                 case 3: //LOGIN
                     int zeroByteCounter=0;
-                    for(int i=2;i<len&&zeroByteCounter<2;i++) //op code bytes may contain zero byte
-                        if(bytes[i]=='\0')
+                    for(int i=2; i<len && zeroByteCounter<2; i++) //op code bytes may contain zero byte
+                        if(bytes[i] == '\0')
                             zeroByteCounter++;
-                    if(zeroByteCounter==2) // termination condition
+                    if(zeroByteCounter == 2) // termination condition
                         return popMessage();
                     break;
                 case 4: //LOGOUT
@@ -64,7 +64,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<BGRSMess
                         return popMessage();
                     break;
                 case 8: //STUDENTSTAT
-                    for(int i=2;i<len;i++) { //op code bytes may contain zero byte
+                    for(int i=2; i<len ;i++) { //op code bytes may contain zero byte
                         if (bytes[i] == '\0') // termination condition
                             return popMessage();
                     }
@@ -99,7 +99,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<BGRSMess
                 }
             }
             message.setOperations(stringOperations);
-        }else if(opCode==5||opCode==6||opCode==7||opCode==9||opCode==10) {// messages with course number
+        } else if(opCode==5||opCode==6||opCode==7||opCode==9||opCode==10) { // messages with course number
             short courseNum = bytesToShort(new byte[]{bytes[2],bytes[3]});
             message.setCourseNum(courseNum);
         }

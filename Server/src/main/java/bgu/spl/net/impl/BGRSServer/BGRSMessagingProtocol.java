@@ -5,9 +5,9 @@ import bgu.spl.net.impl.BGRSServer.Messages.*;
 
 import java.util.ArrayList;
 
-public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
+public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
     private boolean shouldTerminate = false;
-    private User currentUser=null;
+    private User currentUser = null;
     private Database db;
 
     @Override
@@ -47,6 +47,9 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
         return response;
     }
 
+
+
+
     /**
      * An ADMINREG message is used to register an admin in the service. If the username is already registered in the server,
      * an ERROR message is returned. If successful an ACK message will be sent in return. Both string parameters are a sequence
@@ -54,47 +57,56 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
      * @param requestMessage
      * @return
      */
-    private BGRSMessage adminRegistration(RequestMessage requestMessage){
-        // should let register if user logged in?
+    private BGRSMessage adminRegistration(RequestMessage requestMessage) {
         short opCode = 1;
+        if (currentUser != null) {
+            System.out.println("ADMINREG - can't register: someone is already logged in"); // debugging!
+            return new ErrorMessage(opCode);
+        }
         ArrayList<String> operations = requestMessage.getOperations();
         String username = operations.get(0);
         String password = operations.get(1);
-        System.out.println("ADMINREG"); // debugging!
-        System.out.println("operations"); // debugging!
-        operations.forEach(System.out::println); // debugging!
-
-        if(db.isRegistered(username))
+        if (db.isRegistered(username)) {
+            System.out.println("ADMINREG - this user already registered"); // debugging!
             return new ErrorMessage(opCode);
-
+        }
         db.userRegister(username,password,true);
 
-        return new ACKMessage(opCode,"ADMINREG was received");
+
+        System.out.println("ADMINREG"); // debugging!
+
+
+        return new ACKMessage(opCode,"");
     }
 
-    /**
+
+
+
+    /**s
      * A STUDENTREG message is used to register a student in the service. If the username is already registered in the server,
      * an ERROR message is returned. If successful an ACK message will be sent in return.
      * @param requestMessage
      * @return
      */
-    private BGRSMessage studentRegistration(RequestMessage requestMessage){
-        // should let register if user logged in?
+    private BGRSMessage studentRegistration(RequestMessage requestMessage) {
         short opCode = 2;
+        if (currentUser != null) {
+            System.out.println("STUDENTREG - can't register: someone is already logged in"); // debugging!
+            return new ErrorMessage(opCode);
+        }
         ArrayList<String> operations = requestMessage.getOperations();
         String username = operations.get(0);
         String password = operations.get(1);
-        System.out.println("STUDENTREG"); // debugging!
-        System.out.println("operations"); // debugging!
-        operations.forEach(System.out::println); // debugging!
-
-        if(db.isRegistered(username))
+        if (db.isRegistered(username)) {
+            System.out.println("STUDENTREG - can't register: this user is already registered"); // debugging!
             return new ErrorMessage(opCode);
-
+        }
         db.userRegister(username,password,false);
-
-        return new ACKMessage(opCode,"STUDENTREG was received");
+        return new ACKMessage(opCode,"");
     }
+
+
+
 
     /**
      * A LOGIN message is used to login a user into the server. If the user doesn’t exist or the password
@@ -104,42 +116,52 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
      * @return
      */
     private BGRSMessage login(RequestMessage requestMessage) {
-        // should let login if user already logged in?
         short opCode = 3;
+        if (currentUser != null) { // another user is already logged in
+            System.out.println("LOGIN - someone is already logged in"); // debugging!
+            return new ErrorMessage(opCode);
+        }
         ArrayList<String> operations = requestMessage.getOperations();
         String username = operations.get(0);
         String password = operations.get(1);
-        System.out.println("LOGIN"); // debugging!
-        System.out.println("operations"); // debugging!
-        operations.forEach(System.out::println); // debugging!
-
-        if(!db.isRegistered(username))
+        if (!db.isRegistered(username)) { // this user is not registered
+            System.out.println("LOGIN - this user is not registered"); // debugging!
             return new ErrorMessage(opCode);
-
-        if(db.getUser(username).getPassword().equals(password)){
-            this.currentUser = db.getUser(username);
         }
-        else return new ErrorMessage(opCode);
-
-        return new ACKMessage(opCode,"LOGIN was received");
+        if(!db.getUser(username).getPassword().equals(password)) { // wrong password
+            System.out.println("LOGIN - wrong password"); // debugging!
+            return new ErrorMessage(opCode);
+        }
+        if(db.getUser(username).getStat() == true) { // another client is currently logged in to this user
+            System.out.println("LOGIN - another client is currently logged in to this user"); // debugging!
+            return new ErrorMessage(opCode);
+        }
+        this.currentUser = db.getUser(username);
+        this.currentUser.setStat(true);
+        return new ACKMessage(opCode,"");
     }
+
+
+
 
     /**
      * Messages that appear only in a Client-to-Server communication. Informs the server on client disconnection.
      * Client may terminate only after receiving an ACK message in replay. If no user is logged in, sends an ERROR message.
      * @return
      */
-    private BGRSMessage logout(){
+    private BGRSMessage logout() {
         short opCode = 4;
-        System.out.println("LOGOUT");// debugging!
-        if(currentUser!=null){ //user is logged in
-            this.shouldTerminate=true;
-            return new ACKMessage(opCode,"LOGOUT was received");
-        }
-        else{ // user is not logged in
+        if (currentUser == null) { // no user is logged in
+            System.out.println("LOGOUT - no user is logged in"); // debugging!
             return new ErrorMessage(opCode);
         }
+        this.currentUser.setStat(false);
+        this.shouldTerminate = true;
+        return new ACKMessage(opCode,"");
     }
+
+
+
 
     /**
      * Messages that appear only in a Client-to-Server communication.
@@ -151,19 +173,47 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
      * @param requestMessage
      * @return
      */
-    private BGRSMessage courseRegistration(RequestMessage requestMessage){
-        // return error if course doesn't exist
+    private BGRSMessage courseRegistration(RequestMessage requestMessage) {
         short opCode = 5;
-        short courseNumber = requestMessage.getCourseNum();
-        System.out.println("COURSEREG");// debugging!
-        System.out.println("courseNum:"+courseNumber);// debugging!
-        if(currentUser!=null){ //user is logged in
-            return new ACKMessage(opCode,"COURSEREG was received");
-        }
-        else{ // user is not logged in
+        if (currentUser == null || currentUser.isAdmin()) { // no student is logged in
+            System.out.println("COURSEREG - no student is logged in"); // debugging!
             return new ErrorMessage(opCode);
         }
+
+        short courseNumber = requestMessage.getCourseNum();
+        if (db.getCourse(courseNumber) == null) { // this course doesn't exist
+            System.out.println("COURSEREG - there is not such course"); // debugging!
+            return new ErrorMessage(opCode);
+        }
+
+        if (currentUser.isRegistered(courseNumber)) { // the student is already registered to this course
+            System.out.println("COURSEREG - already registered"); // debugging!
+            return new ErrorMessage(opCode);
+        }
+
+        Course currCourse = db.getCourse(courseNumber);
+        int numOfMaxStudents = currCourse.getNumOfMaxStudents();
+        int numOfRegStudents = currCourse.getNumOfRegStudents();
+        if (numOfMaxStudents-numOfRegStudents == 0) { // no seats are available in this course
+            System.out.println("COURSEREG - no seats are available in this course"); // debugging!
+            return new ErrorMessage(opCode);
+        }
+
+        String username = currentUser.getUsername();
+        ArrayList studentCourses = currentUser.getCourses(username);
+        ArrayList kdamList = currCourse.getKdamCoursesList();
+        for (Object course : kdamList) {
+            if (!studentCourses.contains(course)) { // the student doesn't have all the Kdam courses
+                System.out.println("COURSEREG - the student doesn't have all the Kdam courses"); // debugging!
+                return new ErrorMessage(opCode);
+            }
+        }
+        db.registerToCourse(username, courseNumber);
+        return new ACKMessage(opCode,"");
     }
+
+
+
 
     /**
      *
@@ -175,20 +225,24 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
      * @param requestMessage
      * @return
      */
-    private BGRSMessage kdamCheck(RequestMessage requestMessage){
-        // should let check if user logged in?
-        // return error if course doesn't exist
+    private BGRSMessage kdamCheck(RequestMessage requestMessage) {
         short opCode = 6;
-        short courseNumber = requestMessage.getCourseNum();
-        System.out.println("KDAMCHECK ");// debugging!
-        System.out.println("courseNum:"+courseNumber);// debugging!
-        if(currentUser!=null){ //user is logged in
-            return new ACKMessage(opCode,"KDAMCHECK was received");
-        }
-        else{ // user is not logged in
+        if (currentUser == null || currentUser.isAdmin()) { // no student is logged in at the moment
+            System.out.println("KDAMCHECK - no admin is logged in at the moment"); // debugging!
             return new ErrorMessage(opCode);
         }
+
+        short courseNumber = requestMessage.getCourseNum();
+        if (db.getCourse(courseNumber) == null) { // this course doesn't exist
+            System.out.println("KDAMCHECK - there is not such course"); // debugging!
+            return new ErrorMessage(opCode);
+        }
+        Course currCourse = db.getCourse(courseNumber);
+        return new ACKMessage(opCode,currCourse.getKdamCoursesList().toString());
     }
+
+
+
 
     /**
      * The admin sends this message to the server to get the state of a specific course.
@@ -203,19 +257,31 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
      * @param requestMessage
      * @return
      */
-    private BGRSMessage courseState(RequestMessage requestMessage){
+    private BGRSMessage courseState(RequestMessage requestMessage) {
         // return error if course doesn't exist
         short opCode = 7;
-        short courseNumber = requestMessage.getCourseNum();
-        System.out.println("COURSESTAT  ");// debugging!
-        System.out.println("courseNum:"+courseNumber);// debugging!
-        if(currentUser!=null){ //user is logged in
-            return new ACKMessage(opCode,"COURSESTAT was received");
-        }
-        else{ // user is not logged in
+        if (currentUser == null || !currentUser.isAdmin()) { // no admin is logged in at the moment
+            System.out.println("COURSESTAT - no admin is logged in at the moment"); // debugging!
             return new ErrorMessage(opCode);
         }
+
+        short courseNumber = requestMessage.getCourseNum();
+        if (db.getCourse(courseNumber) == null) { // there is no such course
+            System.out.println("COURSESTAT - there is no such course"); // debugging!
+            return new ErrorMessage(opCode);
+        }
+
+        Course currCourse = db.getCourse(courseNumber);
+        String courseName = currCourse.getCourseName();
+        String studentsReg = currCourse.listOfStudents();
+        int maxNumOfReg = currCourse.getNumOfMaxStudents();
+        int freeSeats = maxNumOfReg-currCourse.getNumOfRegStudents();
+
+        return new ACKMessage(opCode,"Course: (" + courseNumber + ") " + courseName + "\n" + "Seats Available: " + freeSeats + "/" + maxNumOfReg + "\n" + "Students Registered: " + studentsReg);
     }
+
+
+
 
     /**
      * A STUDENTSTAT message is used to receive a status about a specific student.
@@ -230,18 +296,27 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
      */
     private BGRSMessage studentStatus(RequestMessage requestMessage) {
         short opCode = 8;
-        ArrayList<String> operations = requestMessage.getOperations();
-        String username = operations.get(0);
-        System.out.println("STUDENTSTAT"); // debugging!
-        System.out.println("operations"); // debugging!
-        operations.forEach(System.out::println); // debugging!
-        if(currentUser!=null){ //user is logged in
-            return new ACKMessage(opCode,"STUDENTSTAT  was received");
-        }
-        else{ // user is not logged in
+        if (currentUser == null || !currentUser.isAdmin()) { // no admin is logged in at the moment
+            System.out.println("STUDENTSTAT - no admin is logged in at the moment"); // debugging!
             return new ErrorMessage(opCode);
         }
+
+        ArrayList<String> operations = requestMessage.getOperations();
+        String username = operations.get(0);
+        if (!db.isRegistered(username)) { // this user is not registered
+            System.out.println("STUDENTSTAT - this user is not registered"); // debugging!
+            return new ErrorMessage(opCode);
+        }
+        User currUser = db.getUser(username);
+        if (currUser.isAdmin()) { // this user is an admin
+            System.out.println("STUDENTSTAT - this user is an ADMIN!"); // debugging!
+            return new ErrorMessage(opCode);
+        }
+        return new ACKMessage(opCode,"Student: " + username + "\n" + "Courses: " + currUser.getCoursesString(username));
     }
+
+
+
 
     /**
      * An ISREGISTERED message is used to know if the student is registered to the specified course.
@@ -250,19 +325,26 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
      * @param requestMessage
      * @return
      */
-    private BGRSMessage isRegistered(RequestMessage requestMessage){
-        // return error if course doesn't exist
+    private BGRSMessage isRegistered(RequestMessage requestMessage) {
         short opCode = 9;
-        short courseNumber = requestMessage.getCourseNum();
-        System.out.println("ISREGISTERED");// debugging!
-        System.out.println("courseNum:"+courseNumber);// debugging!
-        if(currentUser!=null){ //user is logged in
-            return new ACKMessage(opCode,"ISREGISTERED  was received");
-        }
-        else{ // user is not logged in
+        if (currentUser == null || currentUser.isAdmin()) { // no student is logged in at the moment
+            System.out.println("ISREGISTERED - no admin is logged in at the moment"); // debugging!
             return new ErrorMessage(opCode);
         }
+        short courseNumber = requestMessage.getCourseNum();
+        if (!db.courseExist(courseNumber)) { // this course does not exist
+            System.out.println("ISREGISTERED - this course does not exist"); // debugging!
+            return new ErrorMessage(opCode);
+        }
+        if (currentUser.isRegistered(courseNumber))
+            return new ACKMessage(opCode,"REGISTERED");
+        else
+            return new ACKMessage(opCode,"NOT REGISTERED");
     }
+
+
+
+
 
     /**
      * An UNREGISTER message is used to unregister to a specific course
@@ -270,19 +352,30 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
      * @param requestMessage
      * @return
      */
-    private BGRSMessage unRegister(RequestMessage requestMessage){
-        // return error if course doesn't exist
+    private BGRSMessage unRegister(RequestMessage requestMessage) {
         short opCode = 10;
-        short courseNumber = requestMessage.getCourseNum();
-        System.out.println("UNREGISTER ");// debugging!
-        System.out.println("courseNum:"+courseNumber);// debugging!
-        if(currentUser!=null){ //user is logged in
-            return new ACKMessage(opCode,"UNREGISTER was received");
-        }
-        else{ // user is not logged in
+        if (currentUser == null || currentUser.isAdmin()) { // no student is logged in at the moment
+            System.out.println("UNREGISTER - no admin is logged in at the moment"); // debugging!
             return new ErrorMessage(opCode);
         }
+
+        short courseNumber = requestMessage.getCourseNum();
+        if (db.getCourse(courseNumber) == null) { // this course doesn't exist
+            System.out.println("UNREGISTER - there is not such course"); // debugging!
+            return new ErrorMessage(opCode);
+        }
+
+        if (!currentUser.isRegistered(courseNumber)) { // the student is not registered to this course
+            System.out.println("UNREGISTER - not registered"); // debugging!
+            return new ErrorMessage(opCode);
+        }
+
+        db.unRegisterCourse(currentUser.getUsername(), courseNumber);
+        return new ACKMessage(opCode,"");
     }
+
+
+
 
     /**
      * A MYCOURSES message is used to know the courses the student has registered to.
@@ -290,15 +383,13 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage>{
      * that the student has registered to (could be empty []).
      * @return
      */
-    private BGRSMessage myCourses(){
+    private BGRSMessage myCourses() {
         short opCode = 11;
-        System.out.println("MYCOURSES");// debugging!
-        if(currentUser!=null){ //user is logged in
-            return new ACKMessage(opCode,"MYCOURSES  was received");
-        }
-        else{ // user is not logged in
+        if (currentUser == null || currentUser.isAdmin()) { // no student is logged in at the moment
+            System.out.println("MYCOURSES - no admin is logged in at the moment"); // debugging!
             return new ErrorMessage(opCode);
         }
+        return new ACKMessage(opCode, currentUser.getCoursesString(currentUser.getUsername()));
     }
 
     @Override

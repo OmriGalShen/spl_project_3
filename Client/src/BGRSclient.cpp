@@ -56,12 +56,10 @@ int main (int argc, char *argv[]) {
         std::cout << answer  << std::endl; //print server response
         if (terminate) { //
             inputThread.interrupt(); // stop reading user input
-            std::cout << "Exiting... press enter to exit\n" << std::endl;
             break;
         }
     }
 
     inputThread.join(); // stop reading user input
-    std::cout << "Client terminated" << std::endl;
     return 0;
 }

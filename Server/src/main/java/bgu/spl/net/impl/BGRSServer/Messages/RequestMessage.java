@@ -8,7 +8,7 @@ public class RequestMessage extends BGRSMessage {
 
     public RequestMessage(){
         super((short) 0);
-        this.operations =null;
+        this.operations = null;
         this.courseNum = 0;
     }
 
