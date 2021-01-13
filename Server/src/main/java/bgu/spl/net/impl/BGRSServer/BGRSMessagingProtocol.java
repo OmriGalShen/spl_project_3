@@ -60,21 +60,14 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
     private BGRSMessage adminRegistration(RequestMessage requestMessage) {
         short opCode = 1;
         if (currentUser != null) {
-            System.out.println("ADMINREG - can't register: someone is already logged in"); // debugging!
-            return new ErrorMessage(opCode);
+            ArrayList<String> operations = requestMessage.getOperations();
+            String username = operations.get(0);
+            String password = operations.get(1);
+            if (db.userRegister(username,password,true) != null) { // can't register: this user is already registered
+                return new ACKMessage(opCode,"");
+            }
         }
-        ArrayList<String> operations = requestMessage.getOperations();
-        String username = operations.get(0);
-        String password = operations.get(1);
-        if (db.isRegistered(username)) {
-            System.out.println("ADMINREG - this user already registered"); // debugging!
-            return new ErrorMessage(opCode);
-        }
-        if (db.userRegister(username,password,true) != null) { // can't register: this user is already registered
-            System.out.println("STUDENTREG - can't register: this user is already registered"); // debugging!
-            return new ErrorMessage(opCode);
-        }
-        return new ACKMessage(opCode,"");
+        return new ErrorMessage(opCode);
     }
 
 
@@ -89,21 +82,14 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
     private BGRSMessage studentRegistration(RequestMessage requestMessage) {
         short opCode = 2;
         if (currentUser != null) { // can't register: someone is already logged in
-            System.out.println("STUDENTREG - can't register: someone is already logged in"); // debugging!
-            return new ErrorMessage(opCode);
+            ArrayList<String> operations = requestMessage.getOperations();
+            String username = operations.get(0);
+            String password = operations.get(1);
+            if (db.userRegister(username, password, false) != null) { // can't register: this user is already registered
+                return new ACKMessage(opCode, "");
+            }
         }
-        ArrayList<String> operations = requestMessage.getOperations();
-        String username = operations.get(0);
-        String password = operations.get(1);
-        if (db.isRegistered(username)) { // can't register: this user is already registered
-            System.out.println("STUDENTREG - can't register: this user is already registered"); // debugging!
             return new ErrorMessage(opCode);
-        }
-        if (db.userRegister(username,password,false) != null) { // can't register: this user is already registered
-            System.out.println("STUDENTREG - can't register: this user is already registered"); // debugging!
-            return new ErrorMessage(opCode);
-        }
-        return new ACKMessage(opCode,"");
     }
 
 
