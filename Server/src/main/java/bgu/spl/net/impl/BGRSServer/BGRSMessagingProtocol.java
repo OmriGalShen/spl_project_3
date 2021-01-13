@@ -70,12 +70,10 @@ public class BGRSMessagingProtocol implements MessagingProtocol<BGRSMessage> {
             System.out.println("ADMINREG - this user already registered"); // debugging!
             return new ErrorMessage(opCode);
         }
-        db.userRegister(username,password,true);
-
-
-        System.out.println("ADMINREG"); // debugging!
-
-
+        if (db.userRegister(username,password,true) != null) { // can't register: this user is already registered
+            System.out.println("STUDENTREG - can't register: this user is already registered"); // debugging!
+            return new ErrorMessage(opCode);
+        }
         return new ACKMessage(opCode,"");
     }
 
